@@ -8,6 +8,8 @@
 #include <QAbstractItemModel>
 #include <QStringList>
 #include <QList>
+#include <QVector>
+#include <QHash>
 
 class DatabaseInfo;
 
@@ -59,15 +61,6 @@ public:
     }
 };
 
-inline bool operator==(DatabaseListEntry const& lhs, DatabaseListEntry const& rhs)
-{
-    return (lhs.m_path == rhs.m_path);
-}
-
-inline bool operator != (DatabaseListEntry const& lhs, DatabaseListEntry const& rhs)
-{
-    return !(lhs == rhs);
-}
 enum DblvColumns
 {
     DBLV_FAVORITE,
@@ -89,11 +82,15 @@ public:
     DatabaseInfo* findDisplayName(QString path) const;
     void remove(DatabaseInfo* dbi);
 
+    DatabaseListEntry* findByPath(QString path) const;
+
+    void add(QString path, DatabaseListEntry entry);
+
 public: // TODO: make private
     QList<DatabaseInfo*> m_databases;
-    QList<DatabaseListEntry> m_entries;
 
-    DatabaseListEntry* FindEntry(QString s);
+private:
+    mutable QHash<QString, DatabaseListEntry> m_entries;
 };
 
 class DatabaseListModel : public QAbstractItemModel
@@ -139,6 +136,7 @@ protected:
     void checkFileFavorite();
 
     DatabaseRegistry* m_registry;
+    QVector<QString> m_paths;
     QStringList m_columnNames;
 
 protected:

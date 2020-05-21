@@ -52,6 +52,21 @@ void DatabaseRegistry::remove(DatabaseInfo* dbi)
     m_databases.removeAt(m_databases.indexOf(dbi));
 }
 
+DatabaseListEntry* DatabaseRegistry::findByPath(QString path) const
+{
+    if (m_entries.contains(path))
+    {
+        return &m_entries[path];
+    }
+    return nullptr;
+}
+
+void DatabaseRegistry::add(QString path, DatabaseListEntry entry)
+{
+    Q_ASSERT(!m_entries.contains(path));
+    m_entries[path] = entry;
+}
+
 DatabaseListModel::DatabaseListModel(DatabaseRegistry* registry, QObject* parent)
     : QAbstractItemModel(parent)
     , m_registry(registry)
@@ -79,7 +94,7 @@ int DatabaseListModel::rowCount(const QModelIndex &parent) const
     {
         return 0;
     }
-    return m_registry->m_entries.count();
+    return m_paths.count();
 }
 
 int DatabaseListModel::columnCount(const QModelIndex &) const
@@ -94,12 +109,13 @@ bool DatabaseListModel::hasChildren(const QModelIndex &parent) const
 
 QVariant DatabaseListModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || index.row() >= m_registry->m_entries.size())
+    if (!index.isValid() || index.row() >= m_paths.size())
     {
         return QVariant();
     }
 
-    const auto& db = m_registry->m_entries.at(index.row());
+    const auto& path = m_paths.at(index.row());
+    const auto& db = *(m_registry->findByPath(path));
     if(role == Qt::DecorationRole)
     {
         switch(index.column())
@@ -310,232 +326,228 @@ Qt::ItemFlags DatabaseListModel::flags(const QModelIndex &index) const
     }
 }
 
-DatabaseListEntry* DatabaseRegistry::FindEntry(QString s)
-{
-    QMutableListIterator<DatabaseListEntry> i(m_entries);
-    DatabaseListEntry d;
-    d.m_path = s;
-
-    if(i.findNext(d))
-    {
-        return &(i.previous());
-    }
-    return nullptr;
-}
-
 void DatabaseListModel::addEntry(DatabaseListEntry& d, const QString& s)
 {
-    beginInsertRows(QModelIndex(), m_registry->m_entries.count(), m_registry->m_entries.count());
+    beginInsertRows(QModelIndex(), m_paths.count(), m_paths.count());
     d.m_name = QFileInfo(s).fileName();
-    m_registry->m_entries.push_back(d);
+    m_registry->add(d.m_path, d);
+    m_paths.push_back(s);
     endInsertRows();
 }
 
 int DatabaseListModel::getLastIndex(const QString& s) const
 {
-    QListIterator<DatabaseListEntry> i(m_registry->m_entries);
-    DatabaseListEntry d;
-    d.m_path = s;
-
-    if(i.findNext(d))
+    auto db = m_registry->findByPath(s);
+    if (db)
     {
-        const DatabaseListEntry& e = i.previous();
-        return e.m_lastGameIndex;
+        return db->m_lastGameIndex;
     }
-
     return 0;
 }
 
 void DatabaseListModel::limitStars(int limit)
 {
-    QMutableListIterator<DatabaseListEntry> i(m_registry->m_entries);
-    while (i.hasNext())
+    for (int i = 0, sz = m_paths.size(); i < sz; ++i)
     {
-        DatabaseListEntry& d = i.next();
-        if (d.m_stars > limit)
-        {
-            d.m_stars = limit;
-            QModelIndex m = createIndex(m_registry->m_entries.indexOf(d), DBLV_FAVORITE, (void*) nullptr);
-            emit QAbstractItemModel::dataChanged(m, m);
-        }
+        auto db = m_registry->findByPath(m_paths[i]);
+        Q_ASSERT(db != nullptr);
+
+        if (db->m_stars <= limit)
+            continue;
+
+        db->m_stars = limit;
+        QModelIndex m = createIndex(i, DBLV_FAVORITE, (void*)nullptr);
+        emit QAbstractItemModel::dataChanged(m, m);
     }
 }
 
 int DatabaseListModel::stars(const QString &s) const
 {
-    QListIterator<DatabaseListEntry> i(m_registry->m_entries);
-    DatabaseListEntry d;
-    d.m_path = s;
-
-    if(i.findNext(d))
+    auto db = m_registry->findByPath(s);
+    if (db)
     {
-        const DatabaseListEntry& e = i.previous();
-        return e.m_stars;
+        return db->m_stars;
     }
-
     return 0;
 }
 
 void DatabaseListModel::addFileOpen(const QString& s, bool utf8)
 {
-    QMutableListIterator<DatabaseListEntry> i(m_registry->m_entries);
-    DatabaseListEntry d;
-    d.m_path = s;
-
-    if(i.findNext(d))
+    auto row = m_paths.indexOf(s);
+    if (row < 0)
     {
-        DatabaseListEntry& e = i.previous();
-        e.m_utf8 = utf8;
-        if(e.m_state != EDBL_OPEN)
+        // insert new entry
+        DatabaseListEntry d;
+        d.m_path = s;
+        d.m_utf8 = utf8;
+        d.m_state = EDBL_OPEN;
+        addEntry(d, s);
+    }
+    else
+    {
+        // update existing entry
+        auto db = m_registry->findByPath(s);
+        db->m_utf8 = utf8;
+        if (db->m_state != EDBL_OPEN)
         {
-            e.m_state = EDBL_OPEN;
-            QModelIndex m = createIndex(m_registry->m_entries.indexOf(e), DBLV_OPEN, (void*) nullptr);
+            db->m_state = EDBL_OPEN;
+            QModelIndex m = createIndex(row, DBLV_OPEN, (void*)nullptr);
             emit QAbstractItemModel::dataChanged(m, m);
-            m = createIndex(m_registry->m_entries.indexOf(e), DBLV_UTF8, (void*) nullptr);
+            m = createIndex(row, DBLV_UTF8, (void*)nullptr);
             emit QAbstractItemModel::dataChanged(m, m);
         }
-        return;
     }
-
-    d.m_utf8 = utf8;
-    d.m_state = EDBL_OPEN;
-    addEntry(d, s);
 }
 
 void DatabaseListModel::addFavoriteFile(const QString& s, bool bFavorite, int index)
 {
-    QMutableListIterator<DatabaseListEntry> i(m_registry->m_entries);
-    DatabaseListEntry d;
-    d.m_path = s;
-    if(i.findNext(d))
+    auto row = m_paths.indexOf(s);
+    if (row < 0)
     {
-        DatabaseListEntry& e = i.previous();
-        if(e.isFavorite() != bFavorite)
+        // insert new entry
+        DatabaseListEntry d;
+        d.m_path = s;
+        d.setIsFavorite(bFavorite);
+        d.m_lastGameIndex = index;
+        addEntry(d, s);
+        // entry is appended
+        row = m_paths.size() - 1;
+        QModelIndex m = createIndex(row, DBLV_FAVORITE, (void*)nullptr);
+        emit OnSelectIndex(m);
+    }
+    else
+    {
+        // update existing entry
+        auto db = m_registry->findByPath(s);
+        if (db->isFavorite() != bFavorite)
         {
-            e.setIsFavorite(bFavorite);
-            e.m_lastGameIndex = index;
-            QModelIndex m = createIndex(m_registry->m_entries.indexOf(e), DBLV_FAVORITE, (void*)  nullptr);
+            db->setIsFavorite(bFavorite);
+            db->m_lastGameIndex = index;
+            QModelIndex m = createIndex(row, DBLV_FAVORITE, (void*)nullptr);
             emit QAbstractItemModel::dataChanged(m, m);
             emit OnSelectIndex(m);
         }
-        return;
     }
-
-    d.setIsFavorite(bFavorite);
-    d.m_lastGameIndex = index;
-    addEntry(d, s);
-    QModelIndex m = createIndex(rowCount()-1, DBLV_FAVORITE, (void*)  nullptr);
-    emit OnSelectIndex(m);
 }
 
 void DatabaseListModel::setStars(const QString &s, int stars)
 {
-    if(DatabaseListEntry* e = m_registry->FindEntry(s))
-    {
-        if(e->m_stars != stars)
-        {
-            e->m_stars = stars;
-            QModelIndex m = createIndex(m_registry->m_entries.indexOf(*e), DBLV_FAVORITE, (void*) nullptr);
-            emit QAbstractItemModel::dataChanged(m, m);
-        }
-    }
+    auto row = m_paths.indexOf(s);
+    if (row < 0)
+        return;
+
+    auto db = m_registry->findByPath(s);
+    if (db->m_stars == stars)
+        return;
+
+    db->m_stars = stars;
+    QModelIndex m = createIndex(row, DBLV_FAVORITE, (void*)nullptr);
+    emit QAbstractItemModel::dataChanged(m, m);
 }
 
 void DatabaseListModel::setFileClose(const QString& s, int lastIndex)
 {
-    if(DatabaseListEntry* e = m_registry->FindEntry(s))
-    {
-        if(e->m_state == EDBL_OPEN)
-        {
-            e->m_state = EDBL_CLOSE;
-            e->m_lastGameIndex = lastIndex;
-            QModelIndex m = createIndex(m_registry->m_entries.indexOf(*e), DBLV_OPEN, (void*) nullptr);
-            emit QAbstractItemModel::dataChanged(m, m);
-        }
-    }
+    auto row = m_paths.indexOf(s);
+    if (row < 0)
+        return;
+
+    auto db = m_registry->findByPath(s);
+    if (db->m_state == EDBL_CLOSE)
+        return;
+
+    db->m_state = EDBL_CLOSE;
+    db->m_lastGameIndex = lastIndex;
+    QModelIndex m = createIndex(row, DBLV_OPEN, (void*)nullptr);
+    emit QAbstractItemModel::dataChanged(m, m);
 }
 
 void DatabaseListModel::setFileUtf8(const QString& s, bool utf8)
 {
-    if(DatabaseListEntry* e = m_registry->FindEntry(s))
-    {
-        if(e->m_utf8 != utf8)
-        {
-            e->m_utf8 = utf8;
-            QModelIndex m = createIndex(m_registry->m_entries.indexOf(*e), DBLV_UTF8, (void*) nullptr);
-            emit QAbstractItemModel::dataChanged(m, m);
-        }
-    }
+    auto row = m_paths.indexOf(s);
+    if (row < 0)
+        return;
+
+    auto db = m_registry->findByPath(s);
+    if (db->m_utf8 == utf8)
+        return;
+
+    db->m_utf8 = utf8;
+    QModelIndex m = createIndex(row, DBLV_UTF8, (void*)nullptr);
+    emit QAbstractItemModel::dataChanged(m, m);
 }
 
 void DatabaseListModel::setFileCurrent(const QString& s)
 {
-    for(int i = 0; i < m_registry->m_entries.count(); ++i)
+    for (int row = 0, cnt = m_paths.size(); row < cnt; ++row)
     {
-        if(m_registry->m_entries[i].m_isCurrent)
+        auto db = m_registry->findByPath(m_paths[row]);
+        if (db->m_isCurrent)
         {
-            m_registry->m_entries[i].m_isCurrent = false;
-            QModelIndex m = createIndex(i, DBLV_NAME, (void*) nullptr);
-            QModelIndex n = createIndex(i, DBLV_UTF8, (void*) nullptr);
+            db->m_isCurrent = false;
+            QModelIndex m = createIndex(row, DBLV_NAME, (void*) nullptr);
+            QModelIndex n = createIndex(row, DBLV_UTF8, (void*) nullptr);
             emit QAbstractItemModel::dataChanged(m, n);
         }
     }
 
-    if(DatabaseListEntry* e = m_registry->FindEntry(s))
+    auto row = m_paths.indexOf(s);
+    if (row != -1)
     {
-        e->m_isCurrent = true;
-        int index = m_registry->m_entries.indexOf(*e);
-        QModelIndex m = createIndex(index, DBLV_NAME, (void*) nullptr);
-        QModelIndex n = createIndex(index, DBLV_UTF8, (void*) nullptr);
+        auto db = m_registry->findByPath(s);
+        db->m_isCurrent = true;
+
+        QModelIndex m = createIndex(row, DBLV_NAME, (void*) nullptr);
+        QModelIndex n = createIndex(row, DBLV_UTF8, (void*) nullptr);
         emit QAbstractItemModel::dataChanged(m, n);
-        emit OnSelectIndex(createIndex(index, DBLV_FAVORITE, (void*) nullptr));
+        emit OnSelectIndex(createIndex(row, DBLV_FAVORITE, (void*) nullptr));
     }
 }
 
 void DatabaseListModel::update(const QString& s)
 {
-    if(DatabaseListEntry* e = m_registry->FindEntry(s))
+    auto row = m_paths.indexOf(s);
+    if (row != -1)
     {
-        QModelIndex m = createIndex(m_registry->m_entries.indexOf(*e), DBLV_NAME, (void*) nullptr);
-        QModelIndex n = createIndex(m_registry->m_entries.indexOf(*e), DBLV_UTF8, (void*) nullptr);
+        QModelIndex m = createIndex(row, DBLV_NAME, (void*) nullptr);
+        QModelIndex n = createIndex(row, DBLV_UTF8, (void*) nullptr);
         emit QAbstractItemModel::dataChanged(m, n);
     }
 }
 
 void DatabaseListModel::toStringList(QStringList& list)
 {
-    for(int i = 1; i < m_registry->m_entries.count(); ++i)
+    for (int row = 0, cnt = m_paths.size(); row < cnt; ++row)
     {
-        if(m_registry->m_entries[i].isFavorite())
-        {
-            list.append(m_registry->m_entries[i].m_path);
-        }
+        auto db = m_registry->findByPath(m_paths[row]);
+        if (!db->isFavorite())
+            continue;
+        list.append(db->m_path);
     }
 }
 
 void DatabaseListModel::toAttrStringList(QStringList& list) const
 {
-    for(int i = 1; i < m_registry->m_entries.count(); ++i)
+    for (int row = 0, cnt = m_paths.size(); row < cnt; ++row)
     {
-        if(m_registry->m_entries[i].isFavorite())
-        {
-            QString s;
-            s = (m_registry->m_entries[i].m_utf8) ? "utf8" : "ansi";
-            s.append("+stars");
-            s.append(QString::number(m_registry->m_entries[i].m_stars));
-            list.append(s);
-        }
+        auto db = m_registry->findByPath(m_paths[row]);
+        if (!db->isFavorite())
+            continue;
+        QString s;
+        s = (db->m_utf8) ? "utf8" : "ansi";
+        s.append("+stars");
+        s.append(QString::number(db->m_stars));
+        list.append(s);
     }
 }
 
 void DatabaseListModel::toIndexList(QList<QVariant>& list) const
 {
-    for(int i = 1; i < m_registry->m_entries.count(); ++i)
+    for (int row = 0, cnt = m_paths.size(); row < cnt; ++row)
     {
-        if(m_registry->m_entries[i].isFavorite())
-        {
-            list.append(QVariant(m_registry->m_entries[i].m_lastGameIndex));
-        }
+        auto db = m_registry->findByPath(m_paths[row]);
+        if (!db->isFavorite())
+            continue;
+        list.append(db->m_lastGameIndex);
     }
 }
 
