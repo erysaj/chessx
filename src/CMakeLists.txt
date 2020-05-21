@@ -137,6 +137,8 @@ add_library(database STATIC
   database/databaseconversion.h
   database/databaseinfo.cpp
   database/databaseinfo.h
+  database/databaseregistry.cpp
+  database/databaseregistry.h
   database/datesearch.cpp
   database/datesearch.h
   database/downloadmanager.cpp

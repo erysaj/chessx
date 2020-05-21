@@ -142,6 +142,7 @@ HEADERS += src/database/board.h \
   src/database/database.h \
   src/database/databaseconversion.h \
   src/database/databaseinfo.h \
+  src/database/databaseregistry.h \
   src/database/datesearch.h \
   src/database/downloadmanager.h \
   src/database/duplicatesearch.h \
@@ -313,6 +314,7 @@ SOURCES += \
   src/database/database.cpp \
   src/database/databaseconversion.cpp \
   src/database/databaseinfo.cpp \
+  src/database/databaseregistry.cpp \
   src/database/datesearch.cpp \
   src/database/downloadmanager.cpp \
   src/database/duplicatesearch.cpp \
