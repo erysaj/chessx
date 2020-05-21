@@ -128,6 +128,8 @@ add_library(database STATIC
   database/circularbuffer.h
   database/clipboarddatabase.cpp
   database/clipboarddatabase.h
+  database/config.cpp
+  database/config.h
   database/ctg.h
   database/ctgbookwriter.cpp
   database/ctgbookwriter.h

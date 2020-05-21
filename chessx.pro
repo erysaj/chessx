@@ -136,6 +136,7 @@ HEADERS += src/database/board.h \
   src/database/bitfind.h \
   src/database/circularbuffer.h \
   src/database/clipboarddatabase.h \
+  src/database/config.h \
   src/database/ctg.h \
   src/database/ctgbookwriter.h \
   src/database/ctgdatabase.h \
@@ -309,6 +310,7 @@ SOURCES += \
   src/database/bitboard.cpp \
   src/database/board.cpp \
   src/database/clipboarddatabase.cpp \
+  src/database/config.cpp \
   src/database/ctgbookwriter.cpp \
   src/database/ctgdatabase.cpp \
   src/database/database.cpp \
