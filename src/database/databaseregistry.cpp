@@ -32,10 +32,12 @@ DatabaseListEntry* DatabaseRegistry::findByPath(QString path) const
     return nullptr;
 }
 
-void DatabaseRegistry::add(QString path, DatabaseListEntry entry)
+void DatabaseRegistry::insert(DatabaseListEntry entry)
 {
+    auto path = entry.m_path;
     Q_ASSERT(!m_entries.contains(path));
     m_entries[path] = entry;
+    emit didInsert(path);
 }
 
 void DatabaseListEntry::setIsFavorite(bool isFavorite)

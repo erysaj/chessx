@@ -35,6 +35,7 @@ DatabaseListModel::DatabaseListModel(DatabaseRegistry* registry, QObject* parent
     , m_registry(registry)
 {
     m_columnNames << tr("Favorite") << tr("Name") << tr("Size") << tr("Open") << tr("Path") << tr("Format") << tr("Date") << tr("Read");
+    connect(m_registry, SIGNAL(didInsert(QString)), this, SLOT(slotDbInserted(QString)));
 }
 
 QModelIndex DatabaseListModel::index(int row, int column, const QModelIndex &parent) const
@@ -289,12 +290,10 @@ Qt::ItemFlags DatabaseListModel::flags(const QModelIndex &index) const
     }
 }
 
-void DatabaseListModel::addEntry(DatabaseListEntry& d, const QString& s)
+void DatabaseListModel::slotDbInserted(QString path)
 {
     beginInsertRows(QModelIndex(), m_paths.count(), m_paths.count());
-    d.m_name = QFileInfo(s).fileName();
-    m_registry->add(d.m_path, d);
-    m_paths.push_back(s);
+    m_paths.push_back(path);
     endInsertRows();
 }
 
@@ -344,7 +343,8 @@ void DatabaseListModel::addFileOpen(const QString& s, bool utf8)
         d.m_path = s;
         d.m_utf8 = utf8;
         d.m_state = EDBL_OPEN;
-        addEntry(d, s);
+        d.m_name = QFileInfo(s).fileName();
+        m_registry->insert(d);
     }
     else
     {
@@ -372,7 +372,8 @@ void DatabaseListModel::addFavoriteFile(const QString& s, bool bFavorite, int in
         d.m_path = s;
         d.setIsFavorite(bFavorite);
         d.m_lastGameIndex = index;
-        addEntry(d, s);
+        d.m_name = QFileInfo(s).fileName();
+        m_registry->insert(d);
         // entry is appended
         row = m_paths.size() - 1;
         QModelIndex m = createIndex(row, DBLV_FAVORITE, (void*)nullptr);

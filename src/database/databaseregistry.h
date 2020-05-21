@@ -4,6 +4,7 @@
 #include <QString>
 #include <QList>
 #include <QHash>
+#include <QObject>
 
 class DatabaseInfo;
 
@@ -55,8 +56,10 @@ public:
     }
 };
 
-class DatabaseRegistry
+class DatabaseRegistry: public QObject
 {
+    Q_OBJECT
+
 public:
     ~DatabaseRegistry();
 
@@ -66,7 +69,10 @@ public:
 
     DatabaseListEntry* findByPath(QString path) const;
 
-    void add(QString path, DatabaseListEntry entry);
+    void insert(DatabaseListEntry entry);
+
+signals:
+    void didInsert(QString path);
 
 public: // TODO: make private
     QList<DatabaseInfo*> m_databases;

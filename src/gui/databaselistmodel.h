@@ -70,9 +70,8 @@ protected:
     QVector<QString> m_paths;
     QStringList m_columnNames;
 
-protected:
-    void addEntry(DatabaseListEntry& d, const QString& s);
-
+private slots:
+    void slotDbInserted(QString path);
 };
 
 #endif // DATABASELISTMODEL_H
