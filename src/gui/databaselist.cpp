@@ -127,25 +127,6 @@ void DatabaseList::slotContextMenu(const QPoint& pos)
     }
 }
 
-void DatabaseList::save() const
-{
-    AppSettings->beginGroup("Favorites");
-
-    QStringList list;
-    m_model->toStringList(list);
-    AppSettings->setValue("Files", list);
-
-    QStringList attrList;
-    m_model->toAttrStringList(attrList);
-    AppSettings->setValue("Attributes", attrList);
-
-    AppSettings->endGroup();
-
-    QList<QVariant> indexList;
-    m_model->toIndexList(indexList);
-    AppSettings->setValue("Favorites/LastGameIndex", indexList);
-}
-
 void DatabaseList::slotDoubleClicked(const QModelIndex& index)
 {
     QString ts = m_filterModel->data(m_filterModel->index(index.row(), DBLV_PATH)).toString();

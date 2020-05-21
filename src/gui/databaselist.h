@@ -18,7 +18,6 @@ class DatabaseList : public TableView
 public:
     explicit DatabaseList(DatabaseRegistry* registry, QWidget *parent = nullptr);
     ~DatabaseList();
-    void save() const;
 
     GameId getLastIndex(const QString& s) const;
     int stars(const QString& s) const;

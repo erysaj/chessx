@@ -685,7 +685,6 @@ private:
     /* Local variables */
     DatabaseRegistry *m_registry;
     HistoryList m_recentFiles;
-    QStringList m_favoriteFiles;
     
     QPointer<DatabaseInfo> m_currentDatabase;
     QString m_eco;

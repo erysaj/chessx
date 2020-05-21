@@ -40,6 +40,26 @@ void DatabaseRegistry::insert(DatabaseListEntry entry)
     emit didInsert(path);
 }
 
+void DatabaseRegistry::saveFavorites(IConfigSection& cfg) const
+{
+    QStringList files;
+    QStringList attrs;
+    QList<QVariant> games;
+
+    // TODO: iterate using insertion order
+    for (auto& entry: m_entries)
+    {
+        if (!entry.isFavorite())
+            continue;
+        files.append(entry.m_path);
+        attrs.append(entry.encodeAttributes());
+        games.append(entry.m_lastGameIndex);
+    }
+    cfg.setValue("Files", files);
+    cfg.setValue("Attributes", attrs);
+    cfg.setValue("LastGameIndex", games);
+}
+
 void DatabaseListEntry::setIsFavorite(bool isFavorite)
 {
     m_stars = isFavorite ? 1 : 0;
@@ -48,4 +68,10 @@ void DatabaseListEntry::setIsFavorite(bool isFavorite)
 bool DatabaseListEntry::isFavorite() const
 {
     return (m_stars > 0);
+}
+
+QString DatabaseListEntry::encodeAttributes() const
+{
+    QString fmt("%1+stars%2");
+    return fmt.arg(m_utf8? "utf8": "ansi").arg(m_stars);
 }

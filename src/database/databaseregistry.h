@@ -6,6 +6,8 @@
 #include <QHash>
 #include <QObject>
 
+#include "config.h"
+
 class DatabaseInfo;
 
 enum DatabaseListEntryState
@@ -54,6 +56,8 @@ public:
         }
         return m_utf8 ? "UTF8" : "ANSI";
     }
+
+    QString encodeAttributes() const;
 };
 
 class DatabaseRegistry: public QObject
@@ -70,6 +74,8 @@ public:
     DatabaseListEntry* findByPath(QString path) const;
 
     void insert(DatabaseListEntry entry);
+
+    void saveFavorites(IConfigSection& cfg) const;
 
 signals:
     void didInsert(QString path);

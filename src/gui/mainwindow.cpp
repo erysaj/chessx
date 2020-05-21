@@ -595,7 +595,14 @@ void MainWindow::closeEvent(QCloseEvent* e)
     if(confirmQuit())
     {
         m_recentFiles.save();
-        m_databaseList->save();
+        // save favorites
+        {
+            SettingsConfigSection cfg(*AppSettings);
+
+            AppSettings->beginGroup("Favorites");
+            m_registry->saveFavorites(cfg);
+            AppSettings->endGroup();
+        }
 
         m_gameList->saveConfig();
         m_databaseList->saveConfig();
