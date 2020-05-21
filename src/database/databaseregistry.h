@@ -58,6 +58,7 @@ public:
     }
 
     QString encodeAttributes() const;
+    void decodeAttributes(const QString& data);
 };
 
 class DatabaseRegistry: public QObject
@@ -76,6 +77,7 @@ public:
     void insert(DatabaseListEntry entry);
 
     void saveFavorites(IConfigSection& cfg) const;
+    void loadFavorites(const IConfigSection& cfg);
 
 signals:
     void didInsert(QString path);

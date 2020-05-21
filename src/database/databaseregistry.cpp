@@ -44,7 +44,7 @@ void DatabaseRegistry::saveFavorites(IConfigSection& cfg) const
 {
     QStringList files;
     QStringList attrs;
-    QList<QVariant> games;
+    QStringList games;
 
     // TODO: iterate using insertion order
     for (auto& entry: m_entries)
@@ -53,11 +53,49 @@ void DatabaseRegistry::saveFavorites(IConfigSection& cfg) const
             continue;
         files.append(entry.m_path);
         attrs.append(entry.encodeAttributes());
-        games.append(entry.m_lastGameIndex);
+        games.append(QString::number(entry.m_lastGameIndex));
     }
     cfg.setValue("Files", files);
     cfg.setValue("Attributes", attrs);
     cfg.setValue("LastGameIndex", games);
+}
+
+void DatabaseRegistry::loadFavorites(const IConfigSection& cfg)
+{
+    auto files = cfg.value("Files").toStringList();
+    auto attrs = cfg.value("Attributes").toStringList();
+    auto games = cfg.value("LastGameIndex").toList();
+
+    QList<DatabaseListEntry> entries;
+    for (const auto& path: files)
+    {
+        DatabaseListEntry entry;
+        entry.m_path = path;
+        entry.m_name = QFileInfo(path).fileName();
+        // set isFavorite explicitly as we may fail to parse attrs
+        entry.setIsFavorite(true);
+
+        entries.append(entry);
+    }
+    // update attrs
+    for (int i = 0, sz = std::min(entries.size(), attrs.size()); i < sz; ++i)
+    {
+        entries[i].decodeAttributes(attrs[i]);
+    }
+    // update last game index
+    for (int i = 0, sz = std::min(entries.size(), games.size()); i < sz; ++i)
+    {
+        entries[i].m_lastGameIndex = games[i].toInt();
+    }
+    // load
+    for (const auto& entry: entries)
+    {
+        insert(entry);
+    }
+// TODO: port
+//    row = m_paths.size() - 1;
+//    QModelIndex m = createIndex(row, DBLV_FAVORITE, (void*)nullptr);
+//    emit OnSelectIndex(m);
 }
 
 void DatabaseListEntry::setIsFavorite(bool isFavorite)
@@ -74,4 +112,15 @@ QString DatabaseListEntry::encodeAttributes() const
 {
     QString fmt("%1+stars%2");
     return fmt.arg(m_utf8? "utf8": "ansi").arg(m_stars);
+}
+
+void DatabaseListEntry::decodeAttributes(const QString& data)
+{
+    m_utf8 = data.contains("utf8");
+    QRegExp regExp("stars([0-9])");
+    if (regExp.indexIn(data) >= 0)
+    {
+        QString d = regExp.cap(1);
+        m_stars = d.toInt();
+    }
 }

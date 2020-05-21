@@ -1980,28 +1980,11 @@ void MainWindow::SimpleSaveGame()
 
 void MainWindow::restoreRecentFiles()
 {
-    AppSettings->beginGroup("Favorites");
-    QStringList list = AppSettings->value("Files").toStringList();
-    QStringList attributes = AppSettings->value("Attributes").toStringList();
-    QList<int> indexList;
-    AppSettings->list("LastGameIndex", indexList);
-    AppSettings->endGroup();
+    SettingsConfigSection cfg(*AppSettings);
 
-    QStringList::const_iterator it = attributes.cbegin();
-    QList<int>::const_iterator it1 = indexList.cbegin();
-    foreach(QString s, list)
-    {
-        QString attribute = it != attributes.cend() ? *it++ : "";
-        m_databaseList->setFileFavorite(s, true, *it1++);
-        bool bUtf8 = (attribute.contains("utf8"));
-        m_databaseList->setFileUtf8(s, bUtf8);
-        QRegExp regExp("stars([0-9])");
-        if (regExp.indexIn(attribute) >= 0)
-        {
-           QString d = regExp.cap(1);
-           m_databaseList->setStars(s, d.toInt());
-        }
-    }
+    AppSettings->beginGroup("Favorites");
+    m_registry->loadFavorites(cfg);
+    AppSettings->endGroup();
 }
 
 void MainWindow::loadFileFavorites()
