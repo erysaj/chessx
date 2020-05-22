@@ -84,6 +84,7 @@ signals:
 
 public: // TODO: make private
     QList<DatabaseInfo*> m_databases;
+    QList<QString> m_paths;
 
 private:
     mutable QHash<QString, DatabaseListEntry> m_entries;

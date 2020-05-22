@@ -46,9 +46,9 @@ void DatabaseRegistry::saveFavorites(IConfigSection& cfg) const
     QStringList attrs;
     QStringList games;
 
-    // TODO: iterate using insertion order
-    for (auto& entry: m_entries)
+    for (const auto& path: m_paths)
     {
+        const auto& entry = *findByPath(path);
         if (!entry.isFavorite())
             continue;
         files.append(entry.m_path);

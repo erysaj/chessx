@@ -63,7 +63,6 @@ protected:
     void checkFileFavorite();
 
     DatabaseRegistry* m_registry;
-    QVector<QString> m_paths;
     QStringList m_columnNames;
 
 private slots:
