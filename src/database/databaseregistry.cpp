@@ -25,7 +25,7 @@ void DatabaseRegistry::remove(DatabaseInfo* dbi)
 
 DatabaseListEntry* DatabaseRegistry::findByPath(QString path) const
 {
-    return m_entries.value(path, nullptr);
+    return m_items.value(path, nullptr);
 }
 
 void DatabaseRegistry::setState(const QString& identifier, DatabaseListEntryState value)
@@ -34,7 +34,7 @@ void DatabaseRegistry::setState(const QString& identifier, DatabaseListEntryStat
     if (index < 0)
         return;
 
-    auto item = m_entries[identifier];
+    auto item = m_items[identifier];
     if (item->m_state == value)
         return;
     item->m_state = value;
@@ -47,7 +47,7 @@ void DatabaseRegistry::setStars(const QString& identifier, int value)
     if (index < 0)
         return;
 
-    auto item = m_entries[identifier];
+    auto item = m_items[identifier];
     if (item->m_stars == value)
         return;
 
@@ -69,7 +69,7 @@ void DatabaseRegistry::setUtf8(const QString& identifier, bool value)
     if (index < 0)
         return;
 
-    auto item = m_entries[identifier];
+    auto item = m_items[identifier];
     if (item->m_utf8 == value)
         return;
     item->m_utf8 = value;
@@ -82,19 +82,19 @@ void DatabaseRegistry::setLastGame(const QString& identifier, int value)
     if (index < 0)
         return;
 
-    auto item = m_entries[identifier];
+    auto item = m_items[identifier];
     if (item->m_lastGameIndex == value)
         return;
     item->m_lastGameIndex = value;
     emit itemChanged(index, DatabaseListEntry::AttrMask_LastGame);
 }
 
-void DatabaseRegistry::insert(DatabaseListEntry* entry)
+void DatabaseRegistry::insert(DatabaseListEntry* item)
 {
-    auto path = entry->m_path;
-    Q_ASSERT(!m_entries.contains(path));
-    m_entries[path] = entry;
-    entry->setParent(this);
+    auto path = item->m_path;
+    Q_ASSERT(!m_items.contains(path));
+    m_items[path] = item;
+    item->setParent(this);
     emit didInsert(path);
 }
 
@@ -132,7 +132,7 @@ void DatabaseRegistry::makeFavorite(const QString& identifier)
     }
     else
     {
-        auto item = m_entries[identifier];
+        auto item = m_items[identifier];
         if (!item->isFavorite())
         {
             setStars(identifier, 1);
@@ -149,12 +149,12 @@ void DatabaseRegistry::saveFavorites(IConfigSection& cfg) const
 
     for (const auto& path: m_paths)
     {
-        const auto& entry = *findByPath(path);
-        if (!entry.isFavorite())
+        auto item = m_items[path];
+        if (!item->isFavorite())
             continue;
-        files.append(entry.m_path);
-        attrs.append(entry.encodeAttributes());
-        games.append(QString::number(entry.m_lastGameIndex));
+        files.append(item->m_path);
+        attrs.append(item->encodeAttributes());
+        games.append(QString::number(item->m_lastGameIndex));
     }
     cfg.setValue("Files", files);
     cfg.setValue("Attributes", attrs);
@@ -167,31 +167,31 @@ void DatabaseRegistry::loadFavorites(const IConfigSection& cfg)
     auto attrs = cfg.value("Attributes").toStringList();
     auto games = cfg.value("LastGameIndex").toList();
 
-    QList<DatabaseListEntry*> entries;
+    QList<DatabaseListEntry*> items;
     for (const auto& path: files)
     {
-        auto entry = new DatabaseListEntry();
-        entry->m_path = path;
-        entry->m_name = QFileInfo(path).fileName();
+        auto item = new DatabaseListEntry();
+        item->m_path = path;
+        item->m_name = QFileInfo(path).fileName();
         // set isFavorite explicitly as we may fail to parse attrs
-        entry->setIsFavorite(true);
+        item->setIsFavorite(true);
 
-        entries.append(entry);
+        items.append(item);
     }
     // update attrs
-    for (int i = 0, sz = std::min(entries.size(), attrs.size()); i < sz; ++i)
+    for (int i = 0, sz = std::min(items.size(), attrs.size()); i < sz; ++i)
     {
-        entries[i]->decodeAttributes(attrs[i]);
+        items[i]->decodeAttributes(attrs[i]);
     }
     // update last game index
-    for (int i = 0, sz = std::min(entries.size(), games.size()); i < sz; ++i)
+    for (int i = 0, sz = std::min(items.size(), games.size()); i < sz; ++i)
     {
-        entries[i]->m_lastGameIndex = games[i].toInt();
+        items[i]->m_lastGameIndex = games[i].toInt();
     }
     // load
-    for (auto entry: entries)
+    for (auto item: items)
     {
-        insert(entry);
+        insert(item);
     }
 }
 
