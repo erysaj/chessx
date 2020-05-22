@@ -894,15 +894,7 @@ void MainWindow::updateMenuDatabases()
 
 void MainWindow::setFavoriteDatabase(QString fname)
 {
-    QUrl url = QUrl::fromUserInput(fname);
-    if ((url.scheme() == "http") || (url.scheme() == "https") || (url.scheme() == "ftp") || (url.scheme() == "sftp"))
-    {
-        m_databaseList->setFileFavorite(fname, true, 0);
-    }
-    else
-    {
-        m_databaseList->setFileFavorite(url.toLocalFile(), true, 0);
-    }
+    m_databaseList->setFavoriteDatabase(fname);
 }
 
 void MainWindow::slotGameMoveFirst()

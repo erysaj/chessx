@@ -266,6 +266,19 @@ void DatabaseList::addFileOpen(const QString& s, bool utf8)
     m_model->addFileOpen(s, utf8);
 }
 
+void DatabaseList::setFavoriteDatabase(QString fname)
+{
+    QUrl url = QUrl::fromUserInput(fname);
+    if ((url.scheme() == "http") || (url.scheme() == "https") || (url.scheme() == "ftp") || (url.scheme() == "sftp"))
+    {
+        setFileFavorite(fname, true, 0);
+    }
+    else
+    {
+        setFileFavorite(url.toLocalFile(), true, 0);
+    }
+}
+
 void DatabaseList::setFileFavorite(const QString& s, bool bFavorite, int index)
 {
     m_model->addFavoriteFile(s, bFavorite, index);
