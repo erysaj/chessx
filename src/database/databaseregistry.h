@@ -16,8 +16,10 @@ enum DatabaseListEntryState
     EDBL_CLOSE     ///< Database is closed
 };
 
-class DatabaseListEntry
+class DatabaseListEntry: public QObject
 {
+    Q_OBJECT
+
 public:
     enum AttrMask: quint32
     {
@@ -86,7 +88,7 @@ public:
     void setUtf8    (const QString& identifier, bool value);
     void setLastGame(const QString& identifier, int value);
 
-    void insert(DatabaseListEntry entry);
+    void insert(DatabaseListEntry* entry);
 
     void saveFavorites(IConfigSection& cfg) const;
     void loadFavorites(const IConfigSection& cfg);
@@ -103,7 +105,7 @@ public: // TODO: make private
     QList<QString> m_paths;
 
 private:
-    mutable QHash<QString, DatabaseListEntry> m_entries;
+    QHash<QString, DatabaseListEntry*> m_entries;
 };
 
 #endif

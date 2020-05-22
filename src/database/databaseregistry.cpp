@@ -25,11 +25,7 @@ void DatabaseRegistry::remove(DatabaseInfo* dbi)
 
 DatabaseListEntry* DatabaseRegistry::findByPath(QString path) const
 {
-    if (m_entries.contains(path))
-    {
-        return &m_entries[path];
-    }
-    return nullptr;
+    return m_entries.value(path, nullptr);
 }
 
 void DatabaseRegistry::setState(const QString& identifier, DatabaseListEntryState value)
@@ -38,10 +34,10 @@ void DatabaseRegistry::setState(const QString& identifier, DatabaseListEntryStat
     if (index < 0)
         return;
 
-    auto& item = m_entries[identifier];
-    if (item.m_state == value)
+    auto item = m_entries[identifier];
+    if (item->m_state == value)
         return;
-    item.m_state = value;
+    item->m_state = value;
     emit itemChanged(index, DatabaseListEntry::AttrMask_State);
 }
 
@@ -51,13 +47,13 @@ void DatabaseRegistry::setStars(const QString& identifier, int value)
     if (index < 0)
         return;
 
-    auto& item = m_entries[identifier];
-    if (item.m_stars == value)
+    auto item = m_entries[identifier];
+    if (item->m_stars == value)
         return;
 
-    auto oldFav = item.isFavorite();
-    item.m_stars = value;
-    auto newFav = item.isFavorite();
+    auto oldFav = item->isFavorite();
+    item->m_stars = value;
+    auto newFav = item->isFavorite();
 
     quint32 updates = DatabaseListEntry::AttrMask_Stars;
     if (newFav != oldFav)
@@ -73,10 +69,10 @@ void DatabaseRegistry::setUtf8(const QString& identifier, bool value)
     if (index < 0)
         return;
 
-    auto& item = m_entries[identifier];
-    if (item.m_utf8 == value)
+    auto item = m_entries[identifier];
+    if (item->m_utf8 == value)
         return;
-    item.m_utf8 = value;
+    item->m_utf8 = value;
     emit itemChanged(index, DatabaseListEntry::AttrMask_Utf8);
 }
 
@@ -86,18 +82,19 @@ void DatabaseRegistry::setLastGame(const QString& identifier, int value)
     if (index < 0)
         return;
 
-    auto& item = m_entries[identifier];
-    if (item.m_lastGameIndex == value)
+    auto item = m_entries[identifier];
+    if (item->m_lastGameIndex == value)
         return;
-    item.m_lastGameIndex = value;
+    item->m_lastGameIndex = value;
     emit itemChanged(index, DatabaseListEntry::AttrMask_LastGame);
 }
 
-void DatabaseRegistry::insert(DatabaseListEntry entry)
+void DatabaseRegistry::insert(DatabaseListEntry* entry)
 {
-    auto path = entry.m_path;
+    auto path = entry->m_path;
     Q_ASSERT(!m_entries.contains(path));
     m_entries[path] = entry;
+    entry->setParent(this);
     emit didInsert(path);
 }
 
@@ -107,12 +104,12 @@ void DatabaseRegistry::onDatabaseOpen(const QString& identifier, bool utf8)
     if (index < 0)
     {
         // insert new entry
-        DatabaseListEntry d;
-        d.m_path = identifier;
-        d.m_utf8 = utf8;
-        d.m_state = EDBL_OPEN;
-        d.m_name = QFileInfo(identifier).fileName();
-        insert(d);
+        auto item = new DatabaseListEntry();
+        item->m_path = identifier;
+        item->m_utf8 = utf8;
+        item->m_state = EDBL_OPEN;
+        item->m_name = QFileInfo(identifier).fileName();
+        insert(item);
     }
     else
     {
@@ -127,16 +124,16 @@ void DatabaseRegistry::makeFavorite(const QString& identifier)
     auto index = m_paths.indexOf(identifier);
     if (index < 0)
     {
-        DatabaseListEntry item;
-        item.m_path = identifier;
-        item.m_name = QFileInfo(identifier).fileName();
-        item.setIsFavorite(true);
+        auto item = new DatabaseListEntry();
+        item->m_path = identifier;
+        item->m_name = QFileInfo(identifier).fileName();
+        item->setIsFavorite(true);
         insert(item);
     }
     else
     {
-        auto& item = m_entries[identifier];
-        if (!item.isFavorite())
+        auto item = m_entries[identifier];
+        if (!item->isFavorite())
         {
             setStars(identifier, 1);
             setLastGame(identifier, 0);
@@ -170,29 +167,29 @@ void DatabaseRegistry::loadFavorites(const IConfigSection& cfg)
     auto attrs = cfg.value("Attributes").toStringList();
     auto games = cfg.value("LastGameIndex").toList();
 
-    QList<DatabaseListEntry> entries;
+    QList<DatabaseListEntry*> entries;
     for (const auto& path: files)
     {
-        DatabaseListEntry entry;
-        entry.m_path = path;
-        entry.m_name = QFileInfo(path).fileName();
+        auto entry = new DatabaseListEntry();
+        entry->m_path = path;
+        entry->m_name = QFileInfo(path).fileName();
         // set isFavorite explicitly as we may fail to parse attrs
-        entry.setIsFavorite(true);
+        entry->setIsFavorite(true);
 
         entries.append(entry);
     }
     // update attrs
     for (int i = 0, sz = std::min(entries.size(), attrs.size()); i < sz; ++i)
     {
-        entries[i].decodeAttributes(attrs[i]);
+        entries[i]->decodeAttributes(attrs[i]);
     }
     // update last game index
     for (int i = 0, sz = std::min(entries.size(), games.size()); i < sz; ++i)
     {
-        entries[i].m_lastGameIndex = games[i].toInt();
+        entries[i]->m_lastGameIndex = games[i].toInt();
     }
     // load
-    for (const auto& entry: entries)
+    for (auto entry: entries)
     {
         insert(entry);
     }
