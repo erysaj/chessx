@@ -305,7 +305,7 @@ void DatabaseListModel::slotInsertionEnded(int first, int last)
         auto item = m_registry->itemAt(i);
         if (item->isFavorite())
         {
-            setFileCurrent(item->identifier());
+            emit OnSelectIndex(createIndex(i, DBLV_FAVORITE, (void*) nullptr));
             return;
         }
     }
