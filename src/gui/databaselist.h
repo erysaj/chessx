@@ -26,7 +26,7 @@ public:
     void setFavoriteDatabase(QString fname);
 public slots:
     void addFileOpen(const QString& s, bool utf8);
-    void setFileFavorite(const QString& s, bool bFavorite, int index);
+    void setFileFavorite(const QString& s);
     void setStars(const QString& s, int stars);
     void setFileUtf8(const QString&, bool);
     void setFileClose(const QString& s, GameId lastIndex);

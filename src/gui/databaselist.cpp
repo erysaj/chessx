@@ -183,7 +183,7 @@ void DatabaseList::dbSetStarsForSelection(int stars)
     foreach(QModelIndex index, list)
     {
         QString s = m_filterModel->data(m_filterModel->index(index.row(), DBLV_PATH)).toString();
-        setFileFavorite(s, true, 0);
+        setFileFavorite(s);
         setStars(s,stars);
     }
 }
@@ -219,7 +219,7 @@ void DatabaseList::dbSetActiveAtStartup()
     Q_ASSERT(m_cell.isValid());
     QString ts = m_filterModel->data(m_filterModel->index(m_cell.row(), DBLV_PATH)).toString();
     limitStars(4);
-    setFileFavorite(ts, true, 0);
+    setFileFavorite(ts);
     setStars(ts,5);
 }
 
@@ -271,21 +271,18 @@ void DatabaseList::setFavoriteDatabase(QString fname)
     QUrl url = QUrl::fromUserInput(fname);
     if ((url.scheme() == "http") || (url.scheme() == "https") || (url.scheme() == "ftp") || (url.scheme() == "sftp"))
     {
-        setFileFavorite(fname, true, 0);
+        setFileFavorite(fname);
     }
     else
     {
-        setFileFavorite(url.toLocalFile(), true, 0);
+        setFileFavorite(url.toLocalFile());
     }
 }
 
-void DatabaseList::setFileFavorite(const QString& s, bool bFavorite, int index)
+void DatabaseList::setFileFavorite(const QString& s)
 {
-    m_model->addFavoriteFile(s, bFavorite, index);
-    if (bFavorite)
-    {
-        emit raiseRequest();
-    }
+    m_model->addFavoriteFile(s, true, 0);
+    emit raiseRequest();
 }
 
 void DatabaseList::setStars(const QString &s, int stars)
