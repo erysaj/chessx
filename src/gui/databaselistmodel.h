@@ -63,10 +63,12 @@ protected:
     void checkFileFavorite();
 
     DatabaseRegistry* m_registry;
+    int m_currentRow;
     QStringList m_columnNames;
 
 private slots:
     void slotDbInserted(QString path);
+    void update(int row);
 };
 
 #endif // DATABASELISTMODEL_H

@@ -33,6 +33,7 @@ static QString formatFileSize(qint64 size)
 DatabaseListModel::DatabaseListModel(DatabaseRegistry* registry, QObject* parent)
     : QAbstractItemModel(parent)
     , m_registry(registry)
+    , m_currentRow(-1)
 {
     m_columnNames << tr("Favorite") << tr("Name") << tr("Size") << tr("Open") << tr("Path") << tr("Format") << tr("Date") << tr("Read");
     connect(m_registry, SIGNAL(didInsert(QString)), this, SLOT(slotDbInserted(QString)));
@@ -100,7 +101,7 @@ QVariant DatabaseListModel::data(const QModelIndex &index, int role) const
         case DBLV_OPEN:
         {
             bool bIsOpen = db.m_state == EDBL_OPEN;
-            bool bIsCurrent = db.m_isCurrent;
+            bool bIsCurrent = m_currentRow == index.row();
             if(bIsOpen)
             {
                 return QPixmap(bIsCurrent ? ":/images/folder_new.png" : ":/images/fileopen.png");
@@ -152,7 +153,7 @@ QVariant DatabaseListModel::data(const QModelIndex &index, int role) const
     }
     else if(role == Qt::FontRole)
     {
-        if(db.m_isCurrent)
+        if(m_currentRow == index.row())
         {
             if((index.column() == DBLV_NAME) || (index.column() == DBLV_PATH))
             {
@@ -442,38 +443,31 @@ void DatabaseListModel::setFileUtf8(const QString& s, bool utf8)
 
 void DatabaseListModel::setFileCurrent(const QString& s)
 {
-    for (int row = 0, cnt = m_registry->m_paths.size(); row < cnt; ++row)
-    {
-        auto db = m_registry->findByPath(m_registry->m_paths[row]);
-        if (db->m_isCurrent)
-        {
-            db->m_isCurrent = false;
-            QModelIndex m = createIndex(row, DBLV_NAME, (void*) nullptr);
-            QModelIndex n = createIndex(row, DBLV_UTF8, (void*) nullptr);
-            emit QAbstractItemModel::dataChanged(m, n);
-        }
-    }
+    auto prev = m_currentRow;
+    auto next = m_registry->m_paths.indexOf(s);
+    if (next == prev)
+        return;
 
-    auto row = m_registry->m_paths.indexOf(s);
-    if (row != -1)
+    update(prev);
+    m_currentRow = next;
+    update(next);
+    if (next != -1)
     {
-        auto db = m_registry->findByPath(s);
-        db->m_isCurrent = true;
-
-        QModelIndex m = createIndex(row, DBLV_NAME, (void*) nullptr);
-        QModelIndex n = createIndex(row, DBLV_UTF8, (void*) nullptr);
-        emit QAbstractItemModel::dataChanged(m, n);
-        emit OnSelectIndex(createIndex(row, DBLV_FAVORITE, (void*) nullptr));
+        emit OnSelectIndex(createIndex(next, DBLV_FAVORITE, (void*) nullptr));
     }
 }
 
 void DatabaseListModel::update(const QString& s)
 {
     auto row = m_registry->m_paths.indexOf(s);
-    if (row != -1)
-    {
-        QModelIndex m = createIndex(row, DBLV_NAME, (void*) nullptr);
-        QModelIndex n = createIndex(row, DBLV_UTF8, (void*) nullptr);
-        emit QAbstractItemModel::dataChanged(m, n);
-    }
+    update(row);
+}
+
+void DatabaseListModel::update(int row)
+{
+    if (row < 0)
+        return;
+    auto tl = createIndex(row, DBLV_NAME, (void*)nullptr);
+    auto br = createIndex(row, DBLV_UTF8, (void*)nullptr);
+    emit QAbstractItemModel::dataChanged(tl, br);
 }

@@ -21,7 +21,6 @@ class DatabaseListEntry
 public:
     DatabaseListEntry()
     {
-        m_isCurrent     = false;
         m_utf8          = false;
         m_state         = EDBL_CLOSE;
         m_stars         = 0;
@@ -31,7 +30,6 @@ public:
     QString m_name;
     QString m_path;
 
-    bool    m_isCurrent;
     bool    m_utf8;
     int     m_lastGameIndex;
     int     m_stars;
