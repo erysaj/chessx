@@ -54,8 +54,17 @@ void DatabaseRegistry::setStars(const QString& identifier, int value)
     auto& item = m_entries[identifier];
     if (item.m_stars == value)
         return;
+
+    auto oldFav = item.isFavorite();
     item.m_stars = value;
-    emit itemChanged(index, DatabaseListEntry::AttrMask_Stars);
+    auto newFav = item.isFavorite();
+
+    quint32 updates = DatabaseListEntry::AttrMask_Stars;
+    if (newFav != oldFav)
+    {
+        updates |= DatabaseListEntry::AttrMask_Favorite;
+    }
+    emit itemChanged(index, updates);
 }
 
 void DatabaseRegistry::setUtf8(const QString& identifier, bool value)

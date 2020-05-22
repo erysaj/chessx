@@ -23,8 +23,9 @@ public:
     {
         AttrMask_State      = 1 << 0,
         AttrMask_Utf8       = 1 << 1,
-        AttrMask_Stars      = 1 << 2,
-        AttrMask_LastGame   = 1 << 3,
+        AttrMask_Favorite   = 1 << 2,
+        AttrMask_Stars      = 1 << 3,
+        AttrMask_LastGame   = 1 << 4,
     };
 
     DatabaseListEntry()
