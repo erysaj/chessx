@@ -1,6 +1,16 @@
 #include "databaseregistry.h"
 #include "databaseinfo.h"
 
+DatabaseListEntry::DatabaseListEntry(const QString& path)
+    : m_path(path)
+    , m_name(QFileInfo(path).fileName())
+    , m_state(EDBL_CLOSE)
+    , m_stars(0)
+    , m_utf8(false)
+    , m_lastGameIndex(0)
+{
+}
+
 DatabaseRegistry::~DatabaseRegistry()
 {
     qDeleteAll(m_databases.begin(), m_databases.end());
@@ -127,11 +137,9 @@ void DatabaseRegistry::onDatabaseOpen(const QString& identifier, bool utf8)
     if (index < 0)
     {
         // insert new entry
-        auto item = new DatabaseListEntry();
-        item->m_path = identifier;
+        auto item = new DatabaseListEntry(identifier);
         item->m_utf8 = utf8;
         item->m_state = EDBL_OPEN;
-        item->m_name = QFileInfo(identifier).fileName();
         insert(item);
     }
     else
@@ -147,9 +155,7 @@ void DatabaseRegistry::makeFavorite(const QString& identifier)
     auto index = m_identifiers.indexOf(identifier);
     if (index < 0)
     {
-        auto item = new DatabaseListEntry();
-        item->m_path = identifier;
-        item->m_name = QFileInfo(identifier).fileName();
+        auto item = new DatabaseListEntry(identifier);
         item->setIsFavorite(true);
         insert(item);
     }
@@ -193,9 +199,7 @@ void DatabaseRegistry::loadFavorites(const IConfigSection& cfg)
     QList<DatabaseListEntry*> items;
     for (const auto& path: files)
     {
-        auto item = new DatabaseListEntry();
-        item->m_path = path;
-        item->m_name = QFileInfo(path).fileName();
+        auto item = new DatabaseListEntry(path);
         // set isFavorite explicitly as we may fail to parse attrs
         item->setIsFavorite(true);
 

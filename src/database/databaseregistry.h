@@ -30,21 +30,15 @@ public:
         AttrMask_LastGame   = 1 << 4,
     };
 
-    DatabaseListEntry()
-    {
-        m_utf8          = false;
-        m_state         = EDBL_CLOSE;
-        m_stars         = 0;
-        m_lastGameIndex = 0;
-    }
+    DatabaseListEntry(const QString& path);
 
-    QString m_name;
     QString m_path;
+    QString m_name;
 
+    DatabaseListEntryState m_state;
+    int     m_stars;
     bool    m_utf8;
     int     m_lastGameIndex;
-    int     m_stars;
-    DatabaseListEntryState m_state;
 
     bool isFavorite() const;
     void setIsFavorite(bool isFavorite);
