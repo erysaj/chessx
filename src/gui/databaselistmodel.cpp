@@ -37,6 +37,7 @@ DatabaseListModel::DatabaseListModel(DatabaseRegistry* registry, QObject* parent
 {
     m_columnNames << tr("Favorite") << tr("Name") << tr("Size") << tr("Open") << tr("Path") << tr("Format") << tr("Date") << tr("Read");
     connect(m_registry, SIGNAL(didInsert(QString)), this, SLOT(slotDbInserted(QString)));
+    connect(m_registry, SIGNAL(itemChanged(int,quint32)), this, SLOT(slotItemChanged(int,quint32)));
 }
 
 QModelIndex DatabaseListModel::index(int row, int column, const QModelIndex &parent) const
@@ -298,6 +299,45 @@ void DatabaseListModel::slotDbInserted(QString path)
     endInsertRows();
 }
 
+void DatabaseListModel::slotItemChanged(int index, quint32 updates)
+{
+    int minCol = -1;
+    int maxCol = -1;
+
+    // track the range of affected columns
+    auto invalidate = [&minCol, &maxCol](int column)
+    {
+        if (minCol == -1 || column < minCol)
+        {
+            minCol = column;
+        }
+        if (maxCol == -1 || column > maxCol)
+        {
+            maxCol = column;
+        }
+    };
+
+    if ((updates & DatabaseListEntry::AttrMask_State) != 0)
+    {
+        invalidate(DBLV_OPEN);
+    }
+    if ((updates & DatabaseListEntry::AttrMask_Utf8) != 0)
+    {
+        invalidate(DBLV_UTF8);
+    }
+    if ((updates & DatabaseListEntry::AttrMask_Stars) != 0)
+    {
+        invalidate(DBLV_FAVORITE);
+    }
+
+    if (minCol != -1 && maxCol != -1)
+    {
+        QModelIndex tl = createIndex(index, minCol, (void*)nullptr);
+        QModelIndex br = createIndex(index, maxCol, (void*)nullptr);
+        emit QAbstractItemModel::dataChanged(tl, br);
+    }
+}
+
 int DatabaseListModel::getLastIndex(const QString& s) const
 {
     auto db = m_registry->findByPath(s);
@@ -350,16 +390,8 @@ void DatabaseListModel::addFileOpen(const QString& s, bool utf8)
     else
     {
         // update existing entry
-        auto db = m_registry->findByPath(s);
-        db->m_utf8 = utf8;
-        if (db->m_state != EDBL_OPEN)
-        {
-            db->m_state = EDBL_OPEN;
-            QModelIndex m = createIndex(row, DBLV_OPEN, (void*)nullptr);
-            emit QAbstractItemModel::dataChanged(m, m);
-            m = createIndex(row, DBLV_UTF8, (void*)nullptr);
-            emit QAbstractItemModel::dataChanged(m, m);
-        }
+        m_registry->setState(s, EDBL_OPEN);
+        m_registry->setUtf8(s, utf8);
     }
 }
 
@@ -397,48 +429,18 @@ void DatabaseListModel::addFavoriteFile(const QString& s, bool bFavorite, int in
 
 void DatabaseListModel::setStars(const QString &s, int stars)
 {
-    auto row = m_registry->m_paths.indexOf(s);
-    if (row < 0)
-        return;
-
-    auto db = m_registry->findByPath(s);
-    if (db->m_stars == stars)
-        return;
-
-    db->m_stars = stars;
-    QModelIndex m = createIndex(row, DBLV_FAVORITE, (void*)nullptr);
-    emit QAbstractItemModel::dataChanged(m, m);
+    m_registry->setStars(s, stars);
 }
 
 void DatabaseListModel::setFileClose(const QString& s, int lastIndex)
 {
-    auto row = m_registry->m_paths.indexOf(s);
-    if (row < 0)
-        return;
-
-    auto db = m_registry->findByPath(s);
-    if (db->m_state == EDBL_CLOSE)
-        return;
-
-    db->m_state = EDBL_CLOSE;
-    db->m_lastGameIndex = lastIndex;
-    QModelIndex m = createIndex(row, DBLV_OPEN, (void*)nullptr);
-    emit QAbstractItemModel::dataChanged(m, m);
+    m_registry->setLastGame(s, lastIndex);
+    m_registry->setState(s, EDBL_CLOSE);
 }
 
 void DatabaseListModel::setFileUtf8(const QString& s, bool utf8)
 {
-    auto row = m_registry->m_paths.indexOf(s);
-    if (row < 0)
-        return;
-
-    auto db = m_registry->findByPath(s);
-    if (db->m_utf8 == utf8)
-        return;
-
-    db->m_utf8 = utf8;
-    QModelIndex m = createIndex(row, DBLV_UTF8, (void*)nullptr);
-    emit QAbstractItemModel::dataChanged(m, m);
+    m_registry->setUtf8(s, utf8);
 }
 
 void DatabaseListModel::setFileCurrent(const QString& s)

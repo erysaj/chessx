@@ -68,6 +68,7 @@ protected:
 
 private slots:
     void slotDbInserted(QString path);
+    void slotItemChanged(int index, quint32 updates);
     void update(int row);
 };
 
