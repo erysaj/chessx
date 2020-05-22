@@ -77,6 +77,9 @@ class DatabaseRegistry: public QObject
 public:
     ~DatabaseRegistry();
 
+    int itemsCount() const { return m_identifiers.size(); }
+    DatabaseListEntry* itemAt(int index) const;
+
     QList<DatabaseInfo*> databases() const { return m_databases; }
     DatabaseInfo* findDisplayName(QString path) const;
     void remove(DatabaseInfo* dbi);
@@ -102,7 +105,7 @@ signals:
 
 public: // TODO: make private
     QList<DatabaseInfo*> m_databases;
-    QList<QString> m_paths;
+    QList<QString> m_identifiers;
 
 private:
     QHash<QString, DatabaseListEntry*> m_items;

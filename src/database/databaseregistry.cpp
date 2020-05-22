@@ -6,6 +6,12 @@ DatabaseRegistry::~DatabaseRegistry()
     qDeleteAll(m_databases.begin(), m_databases.end());
 }
 
+DatabaseListEntry* DatabaseRegistry::itemAt(int index) const
+{
+    const auto& identifier = m_identifiers.at(index);
+    return m_items.value(identifier, nullptr);
+}
+
 DatabaseInfo* DatabaseRegistry::findDisplayName(QString path) const
 {
     for (auto dbi: m_databases)
@@ -30,7 +36,7 @@ DatabaseListEntry* DatabaseRegistry::findByPath(QString path) const
 
 void DatabaseRegistry::setState(const QString& identifier, DatabaseListEntryState value)
 {
-    auto index = m_paths.indexOf(identifier);
+    auto index = m_identifiers.indexOf(identifier);
     if (index < 0)
         return;
 
@@ -43,7 +49,7 @@ void DatabaseRegistry::setState(const QString& identifier, DatabaseListEntryStat
 
 void DatabaseRegistry::setStars(const QString& identifier, int value)
 {
-    auto index = m_paths.indexOf(identifier);
+    auto index = m_identifiers.indexOf(identifier);
     if (index < 0)
         return;
 
@@ -65,7 +71,7 @@ void DatabaseRegistry::setStars(const QString& identifier, int value)
 
 void DatabaseRegistry::setUtf8(const QString& identifier, bool value)
 {
-    auto index = m_paths.indexOf(identifier);
+    auto index = m_identifiers.indexOf(identifier);
     if (index < 0)
         return;
 
@@ -78,7 +84,7 @@ void DatabaseRegistry::setUtf8(const QString& identifier, bool value)
 
 void DatabaseRegistry::setLastGame(const QString& identifier, int value)
 {
-    auto index = m_paths.indexOf(identifier);
+    auto index = m_identifiers.indexOf(identifier);
     if (index < 0)
         return;
 
@@ -100,7 +106,7 @@ void DatabaseRegistry::insert(DatabaseListEntry* item)
 
 void DatabaseRegistry::onDatabaseOpen(const QString& identifier, bool utf8)
 {
-    auto index = m_paths.indexOf(identifier);
+    auto index = m_identifiers.indexOf(identifier);
     if (index < 0)
     {
         // insert new entry
@@ -121,7 +127,7 @@ void DatabaseRegistry::onDatabaseOpen(const QString& identifier, bool utf8)
 
 void DatabaseRegistry::makeFavorite(const QString& identifier)
 {
-    auto index = m_paths.indexOf(identifier);
+    auto index = m_identifiers.indexOf(identifier);
     if (index < 0)
     {
         auto item = new DatabaseListEntry();
@@ -147,9 +153,9 @@ void DatabaseRegistry::saveFavorites(IConfigSection& cfg) const
     QStringList attrs;
     QStringList games;
 
-    for (const auto& path: m_paths)
+    for (const auto& identifier: m_identifiers)
     {
-        auto item = m_items[path];
+        auto item = m_items[identifier];
         if (!item->isFavorite())
             continue;
         files.append(item->m_path);

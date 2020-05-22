@@ -60,7 +60,7 @@ int DatabaseListModel::rowCount(const QModelIndex &parent) const
     {
         return 0;
     }
-    return m_registry->m_paths.count();
+    return m_registry->itemsCount();
 }
 
 int DatabaseListModel::columnCount(const QModelIndex &) const
@@ -75,13 +75,12 @@ bool DatabaseListModel::hasChildren(const QModelIndex &parent) const
 
 QVariant DatabaseListModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || index.row() >= m_registry->m_paths.size())
+    if (!index.isValid() || index.row() >= m_registry->itemsCount())
     {
         return QVariant();
     }
 
-    const auto& path = m_registry->m_paths.at(index.row());
-    const auto& db = *(m_registry->findByPath(path));
+    const auto& db = *(m_registry->itemAt(index.row()));
     if(role == Qt::DecorationRole)
     {
         switch(index.column())
@@ -294,8 +293,8 @@ Qt::ItemFlags DatabaseListModel::flags(const QModelIndex &index) const
 
 void DatabaseListModel::slotDbInserted(QString path)
 {
-    beginInsertRows(QModelIndex(), m_registry->m_paths.count(), m_registry->m_paths.count());
-    m_registry->m_paths.push_back(path);
+    beginInsertRows(QModelIndex(), m_registry->itemsCount(), m_registry->itemsCount());
+    m_registry->m_identifiers.push_back(path);
     endInsertRows();
 
     auto item = m_registry->findByPath(path);
@@ -337,11 +336,10 @@ void DatabaseListModel::slotItemChanged(int index, quint32 updates)
     }
     if ((updates & DatabaseListEntry::AttrMask_Favorite) != 0)
     {
-        auto path = m_registry->m_paths[index];
-        auto item = m_registry->findByPath(path);
+        auto item = m_registry->itemAt(index);
         if (item->isFavorite())
         {
-            setFileCurrent(path);
+            setFileCurrent(item->m_path);
         }
     }
 
@@ -365,9 +363,9 @@ int DatabaseListModel::getLastIndex(const QString& s) const
 
 void DatabaseListModel::limitStars(int limit)
 {
-    for (int i = 0, sz = m_registry->m_paths.size(); i < sz; ++i)
+    for (int i = 0, sz = m_registry->itemsCount(); i < sz; ++i)
     {
-        auto db = m_registry->findByPath(m_registry->m_paths[i]);
+        auto db = m_registry->itemAt(i);
         Q_ASSERT(db != nullptr);
 
         if (db->m_stars <= limit)
@@ -408,7 +406,7 @@ void DatabaseListModel::setFileUtf8(const QString& s, bool utf8)
 void DatabaseListModel::setFileCurrent(const QString& s)
 {
     auto prev = m_currentRow;
-    auto next = m_registry->m_paths.indexOf(s);
+    auto next = m_registry->m_identifiers.indexOf(s);
     if (next == prev)
         return;
 
@@ -423,7 +421,7 @@ void DatabaseListModel::setFileCurrent(const QString& s)
 
 void DatabaseListModel::update(const QString& s)
 {
-    auto row = m_registry->m_paths.indexOf(s);
+    auto row = m_registry->m_identifiers.indexOf(s);
     update(row);
 }
 
