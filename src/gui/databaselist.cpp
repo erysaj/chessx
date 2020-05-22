@@ -442,7 +442,7 @@ void DatabaseList::dropEvent(QDropEvent *event)
 
                 if(m_lastModifier & LINK_MODIFIER)
                 {
-                    emit requestLinkDatabase(ts);
+                    this->setFavoriteDatabase(ts);
                 }
                 else
                 {

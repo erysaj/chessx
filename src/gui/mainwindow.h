@@ -143,8 +143,6 @@ public slots:
     void openDatabaseArchive(QString fname, bool utf8);
     /** Open database from a local File */
     void openDatabaseFile(QString fname, bool utf8);
-    /** Add favorite status to a database */
-    void setFavoriteDatabase(QString fname);
     /** Promote current variation. */
     void slotEditVarPromote();
     /** Remove current variation. */

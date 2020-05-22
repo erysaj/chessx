@@ -294,8 +294,6 @@ MainWindow::MainWindow() : QMainWindow(),
             this, SLOT(openDatabaseUrl(QString, bool)));
     connect(m_databaseList, SIGNAL(requestCloseDatabase(QString)),
             this, SLOT(slotFileCloseName(QString)));
-    connect(m_databaseList, SIGNAL(requestLinkDatabase(QString)),
-            this, SLOT(setFavoriteDatabase(QString)));
     connect(m_databaseList, SIGNAL(requestAppendGames(QString, QList<GameId>, QString)),
             this, SLOT(copyGames(QString, QList<GameId>, QString)));
     connect(m_gameList, SIGNAL(requestAppendGames(QString, QList<GameId>, QString)),
@@ -314,7 +312,7 @@ MainWindow::MainWindow() : QMainWindow(),
     connect(this, SIGNAL(signalGameModeChanged(bool)), m_databaseList, SLOT(setDisabled(bool)));
 
     /* Create FICS database */
-    setFavoriteDatabase(ficsPath());
+    m_databaseList->setFavoriteDatabase(ficsPath());
 
     /* Recent files */
     m_recentFiles.restore();
@@ -890,11 +888,6 @@ void MainWindow::updateMenuDatabases()
             }
         }
     }
-}
-
-void MainWindow::setFavoriteDatabase(QString fname)
-{
-    m_databaseList->setFavoriteDatabase(fname);
 }
 
 void MainWindow::slotGameMoveFirst()
