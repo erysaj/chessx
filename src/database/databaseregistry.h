@@ -102,7 +102,8 @@ public:
     void makeFavorite(const QString& identifier);
 
 signals:
-    void didInsert(QString path);
+    void itemsInsertBegan(int first, int last);
+    void itemsInsertEnded(int first, int last);
     void itemChanged(int index, quint32 updates);
 
 public: // TODO: make private

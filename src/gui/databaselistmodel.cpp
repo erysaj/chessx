@@ -36,7 +36,8 @@ DatabaseListModel::DatabaseListModel(DatabaseRegistry* registry, QObject* parent
     , m_currentRow(-1)
 {
     m_columnNames << tr("Favorite") << tr("Name") << tr("Size") << tr("Open") << tr("Path") << tr("Format") << tr("Date") << tr("Read");
-    connect(m_registry, SIGNAL(didInsert(QString)), this, SLOT(slotDbInserted(QString)));
+    connect(m_registry, SIGNAL(itemsInsertBegan(int,int)), this, SLOT(slotInsertionBegan(int,int)));
+    connect(m_registry, SIGNAL(itemsInsertEnded(int,int)), this, SLOT(slotInsertionEnded(int,int)));
     connect(m_registry, SIGNAL(itemChanged(int,quint32)), this, SLOT(slotItemChanged(int,quint32)));
 }
 
@@ -291,16 +292,22 @@ Qt::ItemFlags DatabaseListModel::flags(const QModelIndex &index) const
     }
 }
 
-void DatabaseListModel::slotDbInserted(QString path)
+void DatabaseListModel::slotInsertionBegan(int first, int last)
 {
-    beginInsertRows(QModelIndex(), m_registry->itemsCount(), m_registry->itemsCount());
-    m_registry->m_identifiers.push_back(path);
-    endInsertRows();
+    beginInsertRows(QModelIndex(), first, last);
+}
 
-    auto item = m_registry->findByPath(path);
-    if (item->isFavorite())
+void DatabaseListModel::slotInsertionEnded(int first, int last)
+{
+    endInsertRows();
+    for (int i = last; i >= first; --i)
     {
-        setFileCurrent(path);
+        auto item = m_registry->itemAt(i);
+        if (item->isFavorite())
+        {
+            setFileCurrent(item->identifier());
+            return;
+        }
     }
 }
 

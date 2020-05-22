@@ -66,7 +66,8 @@ protected:
     QStringList m_columnNames;
 
 private slots:
-    void slotDbInserted(QString path);
+    void slotInsertionBegan(int first, int last);
+    void slotInsertionEnded(int first, int last);
     void slotItemChanged(int index, quint32 updates);
     void update(int row);
 };

@@ -126,9 +126,13 @@ void DatabaseRegistry::insert(DatabaseListEntry* item)
 {
     auto identifier = item->identifier();
     Q_ASSERT(!m_items.contains(identifier));
+    int dst = m_identifiers.size();
+
+    emit itemsInsertBegan(dst, dst);
     m_items[identifier] = item;
     item->setParent(this);
-    emit didInsert(identifier);
+    m_identifiers.append(identifier);
+    emit itemsInsertEnded(dst, dst);
 }
 
 void DatabaseRegistry::onDatabaseOpen(const QString& identifier, bool utf8)
