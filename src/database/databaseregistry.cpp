@@ -34,6 +34,23 @@ DatabaseListEntry* DatabaseRegistry::findByPath(QString path) const
     return m_items.value(path, nullptr);
 }
 
+void DatabaseRegistry::setStartupDatabase(const QString& identifier)
+{
+    for (auto item: m_items)
+    {
+        // startup database is marked 5 stars
+        // there should be only 1 such database
+        if (item->m_path == identifier)
+        {
+            setStars(item->m_path, 5);
+        }
+        else if (item->m_stars > 4)
+        {
+            setStars(item->m_path, 4);
+        }
+    }
+}
+
 void DatabaseRegistry::setState(const QString& identifier, DatabaseListEntryState value)
 {
     auto index = m_identifiers.indexOf(identifier);

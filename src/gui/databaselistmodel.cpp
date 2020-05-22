@@ -361,22 +361,6 @@ int DatabaseListModel::getLastIndex(const QString& s) const
     return 0;
 }
 
-void DatabaseListModel::limitStars(int limit)
-{
-    for (int i = 0, sz = m_registry->itemsCount(); i < sz; ++i)
-    {
-        auto db = m_registry->itemAt(i);
-        Q_ASSERT(db != nullptr);
-
-        if (db->m_stars <= limit)
-            continue;
-
-        db->m_stars = limit;
-        QModelIndex m = createIndex(i, DBLV_FAVORITE, (void*)nullptr);
-        emit QAbstractItemModel::dataChanged(m, m);
-    }
-}
-
 int DatabaseListModel::stars(const QString &s) const
 {
     auto db = m_registry->findByPath(s);

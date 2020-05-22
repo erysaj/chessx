@@ -85,6 +85,7 @@ public:
     void remove(DatabaseInfo* dbi);
 
     DatabaseListEntry* findByPath(QString path) const;
+    void setStartupDatabase(const QString& identifier);
 
     void setState   (const QString& identifier, DatabaseListEntryState value);
     void setStars   (const QString& identifier, int value);

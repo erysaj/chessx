@@ -217,10 +217,8 @@ void DatabaseList::dbSetActiveAtStartup()
 {
     // There can only be one such file, the previous file loses the active flag
     Q_ASSERT(m_cell.isValid());
-    QString ts = m_filterModel->data(m_filterModel->index(m_cell.row(), DBLV_PATH)).toString();
-    limitStars(4);
-    setFileFavorite(ts);
-    setStars(ts,5);
+    QString path = m_filterModel->data(m_filterModel->index(m_cell.row(), DBLV_PATH)).toString();
+    m_model->registry()->setStartupDatabase(path);
 }
 
 void DatabaseList::slotMakeBook()
@@ -249,11 +247,6 @@ void DatabaseList::slotShowInFinder()
 GameId DatabaseList::getLastIndex(const QString& s) const
 {
     return m_model->getLastIndex(s);
-}
-
-void DatabaseList::limitStars(int limit)
-{
-    m_model->limitStars(limit);
 }
 
 int DatabaseList::stars(const QString &s) const

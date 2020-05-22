@@ -58,7 +58,6 @@ public:
 public:
     virtual QVariant headerData(int section, Qt::Orientation orientation,
                                 int role = Qt::DisplayRole) const;
-    void limitStars(int limit);
 protected:
     void checkFileFavorite();
 

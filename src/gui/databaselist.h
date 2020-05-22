@@ -22,7 +22,6 @@ public:
     GameId getLastIndex(const QString& s) const;
     int stars(const QString& s) const;
 
-    void limitStars(int limit);
     void setFavoriteDatabase(QString fname);
 public slots:
     void setFileFavorite(const QString& s);
