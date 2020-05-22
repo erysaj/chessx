@@ -32,6 +32,58 @@ DatabaseListEntry* DatabaseRegistry::findByPath(QString path) const
     return nullptr;
 }
 
+void DatabaseRegistry::setState(const QString& identifier, DatabaseListEntryState value)
+{
+    auto index = m_paths.indexOf(identifier);
+    if (index < 0)
+        return;
+
+    auto& item = m_entries[identifier];
+    if (item.m_state == value)
+        return;
+    item.m_state = value;
+    emit itemChanged(index, DatabaseListEntry::AttrMask_State);
+}
+
+void DatabaseRegistry::setStars(const QString& identifier, int value)
+{
+    auto index = m_paths.indexOf(identifier);
+    if (index < 0)
+        return;
+
+    auto& item = m_entries[identifier];
+    if (item.m_stars == value)
+        return;
+    item.m_stars = value;
+    emit itemChanged(index, DatabaseListEntry::AttrMask_Stars);
+}
+
+void DatabaseRegistry::setUtf8(const QString& identifier, bool value)
+{
+    auto index = m_paths.indexOf(identifier);
+    if (index < 0)
+        return;
+
+    auto& item = m_entries[identifier];
+    if (item.m_utf8 == value)
+        return;
+    item.m_utf8 = value;
+    emit itemChanged(index, DatabaseListEntry::AttrMask_Utf8);
+}
+
+void DatabaseRegistry::setLastGame(const QString& identifier, int value)
+{
+    auto index = m_paths.indexOf(identifier);
+    if (index < 0)
+        return;
+
+    auto& item = m_entries[identifier];
+    if (item.m_lastGameIndex == value)
+        return;
+    item.m_lastGameIndex = value;
+    emit itemChanged(index, DatabaseListEntry::AttrMask_LastGame);
+}
+
 void DatabaseRegistry::insert(DatabaseListEntry entry)
 {
     auto path = entry.m_path;

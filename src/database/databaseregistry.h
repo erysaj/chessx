@@ -19,6 +19,14 @@ enum DatabaseListEntryState
 class DatabaseListEntry
 {
 public:
+    enum AttrMask: quint32
+    {
+        AttrMask_State      = 1 << 0,
+        AttrMask_Utf8       = 1 << 1,
+        AttrMask_Stars      = 1 << 2,
+        AttrMask_LastGame   = 1 << 3,
+    };
+
     DatabaseListEntry()
     {
         m_utf8          = false;
@@ -72,6 +80,11 @@ public:
 
     DatabaseListEntry* findByPath(QString path) const;
 
+    void setState   (const QString& identifier, DatabaseListEntryState value);
+    void setStars   (const QString& identifier, int value);
+    void setUtf8    (const QString& identifier, bool value);
+    void setLastGame(const QString& identifier, int value);
+
     void insert(DatabaseListEntry entry);
 
     void saveFavorites(IConfigSection& cfg) const;
@@ -79,6 +92,7 @@ public:
 
 signals:
     void didInsert(QString path);
+    void itemChanged(int index, quint32 updates);
 
 public: // TODO: make private
     QList<DatabaseInfo*> m_databases;
