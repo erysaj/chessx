@@ -90,6 +90,8 @@ public:
     void saveFavorites(IConfigSection& cfg) const;
     void loadFavorites(const IConfigSection& cfg);
 
+    void onDatabaseOpen(const QString& identifier, bool utf8);
+
 signals:
     void didInsert(QString path);
     void itemChanged(int index, quint32 updates);

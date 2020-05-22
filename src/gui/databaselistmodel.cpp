@@ -374,27 +374,6 @@ int DatabaseListModel::stars(const QString &s) const
     return 0;
 }
 
-void DatabaseListModel::addFileOpen(const QString& s, bool utf8)
-{
-    auto row = m_registry->m_paths.indexOf(s);
-    if (row < 0)
-    {
-        // insert new entry
-        DatabaseListEntry d;
-        d.m_path = s;
-        d.m_utf8 = utf8;
-        d.m_state = EDBL_OPEN;
-        d.m_name = QFileInfo(s).fileName();
-        m_registry->insert(d);
-    }
-    else
-    {
-        // update existing entry
-        m_registry->setState(s, EDBL_OPEN);
-        m_registry->setUtf8(s, utf8);
-    }
-}
-
 void DatabaseListModel::addFavoriteFile(const QString& s, bool bFavorite, int index)
 {
     auto row = m_registry->m_paths.indexOf(s);

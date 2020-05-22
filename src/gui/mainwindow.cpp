@@ -304,7 +304,7 @@ MainWindow::MainWindow() : QMainWindow(),
     connect(m_databaseList, SIGNAL(requestMakeBook(QString)),
             this, SLOT(slotMakeBook(QString)));
 
-    m_databaseList->addFileOpen(pClipDB->database()->name(), false);
+    m_registry->onDatabaseOpen(pClipDB->database()->name(), false);
     m_databaseList->setFileCurrent(pClipDB->database()->name());
 
     restoreRecentFiles();
@@ -1153,7 +1153,7 @@ void MainWindow::slotDataBaseLoaded(DatabaseInfo* db)
     QFileInfo fi = QFileInfo(fname);
     QString basefile = fi.completeBaseName();
 
-    m_databaseList->addFileOpen(fname, db->IsUtf8());
+    m_registry->onDatabaseOpen(fname, db->IsUtf8());
 
     finishOperation(tr("%1 opened").arg(basefile));
 

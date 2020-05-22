@@ -38,7 +38,6 @@ signals:
     void NoFileFavorite();
 
 public slots:
-    void addFileOpen(const QString& s, bool utf8);
     void addFavoriteFile(const QString& s, bool bFavorite, int index);
     void setStars(const QString& s, int stars);
     void setFileUtf8(const QString&, bool);

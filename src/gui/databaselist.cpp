@@ -261,11 +261,6 @@ int DatabaseList::stars(const QString &s) const
     return m_model->stars(s);
 }
 
-void DatabaseList::addFileOpen(const QString& s, bool utf8)
-{
-    m_model->addFileOpen(s, utf8);
-}
-
 void DatabaseList::setFavoriteDatabase(QString fname)
 {
     QUrl url = QUrl::fromUserInput(fname);

@@ -92,6 +92,27 @@ void DatabaseRegistry::insert(DatabaseListEntry entry)
     emit didInsert(path);
 }
 
+void DatabaseRegistry::onDatabaseOpen(const QString& identifier, bool utf8)
+{
+    auto index = m_paths.indexOf(identifier);
+    if (index < 0)
+    {
+        // insert new entry
+        DatabaseListEntry d;
+        d.m_path = identifier;
+        d.m_utf8 = utf8;
+        d.m_state = EDBL_OPEN;
+        d.m_name = QFileInfo(identifier).fileName();
+        insert(d);
+    }
+    else
+    {
+        // update existing entry
+        setState(identifier, EDBL_OPEN);
+        setUtf8(identifier, utf8);
+    }
+}
+
 void DatabaseRegistry::saveFavorites(IConfigSection& cfg) const
 {
     QStringList files;

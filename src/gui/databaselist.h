@@ -25,7 +25,6 @@ public:
     void limitStars(int limit);
     void setFavoriteDatabase(QString fname);
 public slots:
-    void addFileOpen(const QString& s, bool utf8);
     void setFileFavorite(const QString& s);
     void setStars(const QString& s, int stars);
     void setFileUtf8(const QString&, bool);
