@@ -122,6 +122,28 @@ void DatabaseRegistry::onDatabaseOpen(const QString& identifier, bool utf8)
     }
 }
 
+void DatabaseRegistry::makeFavorite(const QString& identifier)
+{
+    auto index = m_paths.indexOf(identifier);
+    if (index < 0)
+    {
+        DatabaseListEntry item;
+        item.m_path = identifier;
+        item.m_name = QFileInfo(identifier).fileName();
+        item.setIsFavorite(true);
+        insert(item);
+    }
+    else
+    {
+        auto& item = m_entries[identifier];
+        if (!item.isFavorite())
+        {
+            setStars(identifier, 1);
+            setLastGame(identifier, 0);
+        }
+    }
+}
+
 void DatabaseRegistry::saveFavorites(IConfigSection& cfg) const
 {
     QStringList files;
@@ -174,10 +196,6 @@ void DatabaseRegistry::loadFavorites(const IConfigSection& cfg)
     {
         insert(entry);
     }
-// TODO: port
-//    row = m_paths.size() - 1;
-//    QModelIndex m = createIndex(row, DBLV_FAVORITE, (void*)nullptr);
-//    emit OnSelectIndex(m);
 }
 
 void DatabaseListEntry::setIsFavorite(bool isFavorite)

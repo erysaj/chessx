@@ -297,6 +297,12 @@ void DatabaseListModel::slotDbInserted(QString path)
     beginInsertRows(QModelIndex(), m_registry->m_paths.count(), m_registry->m_paths.count());
     m_registry->m_paths.push_back(path);
     endInsertRows();
+
+    auto item = m_registry->findByPath(path);
+    if (item->isFavorite())
+    {
+        setFileCurrent(path);
+    }
 }
 
 void DatabaseListModel::slotItemChanged(int index, quint32 updates)
@@ -328,6 +334,15 @@ void DatabaseListModel::slotItemChanged(int index, quint32 updates)
     if ((updates & DatabaseListEntry::AttrMask_Stars) != 0)
     {
         invalidate(DBLV_FAVORITE);
+    }
+    if ((updates & DatabaseListEntry::AttrMask_Favorite) != 0)
+    {
+        auto path = m_registry->m_paths[index];
+        auto item = m_registry->findByPath(path);
+        if (item->isFavorite())
+        {
+            setFileCurrent(path);
+        }
     }
 
     if (minCol != -1 && maxCol != -1)
@@ -372,38 +387,6 @@ int DatabaseListModel::stars(const QString &s) const
         return db->m_stars;
     }
     return 0;
-}
-
-void DatabaseListModel::addFavoriteFile(const QString& s, bool bFavorite, int index)
-{
-    auto row = m_registry->m_paths.indexOf(s);
-    if (row < 0)
-    {
-        // insert new entry
-        DatabaseListEntry d;
-        d.m_path = s;
-        d.setIsFavorite(bFavorite);
-        d.m_lastGameIndex = index;
-        d.m_name = QFileInfo(s).fileName();
-        m_registry->insert(d);
-        // entry is appended
-        row = m_registry->m_paths.size() - 1;
-        QModelIndex m = createIndex(row, DBLV_FAVORITE, (void*)nullptr);
-        emit OnSelectIndex(m);
-    }
-    else
-    {
-        // update existing entry
-        auto db = m_registry->findByPath(s);
-        if (db->isFavorite() != bFavorite)
-        {
-            db->setIsFavorite(bFavorite);
-            db->m_lastGameIndex = index;
-            QModelIndex m = createIndex(row, DBLV_FAVORITE, (void*)nullptr);
-            emit QAbstractItemModel::dataChanged(m, m);
-            emit OnSelectIndex(m);
-        }
-    }
 }
 
 void DatabaseListModel::setStars(const QString &s, int stars)

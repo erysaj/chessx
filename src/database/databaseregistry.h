@@ -92,6 +92,7 @@ public:
     void loadFavorites(const IConfigSection& cfg);
 
     void onDatabaseOpen(const QString& identifier, bool utf8);
+    void makeFavorite(const QString& identifier);
 
 signals:
     void didInsert(QString path);

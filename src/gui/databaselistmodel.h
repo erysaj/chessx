@@ -30,6 +30,8 @@ class DatabaseListModel : public QAbstractItemModel
 public:
     explicit DatabaseListModel(DatabaseRegistry* registry, QObject *parent = nullptr);
 
+    DatabaseRegistry* registry() const { return m_registry; }
+
     int getLastIndex(const QString& s) const;
     int stars(const QString& s) const;
 
@@ -38,7 +40,6 @@ signals:
     void NoFileFavorite();
 
 public slots:
-    void addFavoriteFile(const QString& s, bool bFavorite, int index);
     void setStars(const QString& s, int stars);
     void setFileUtf8(const QString&, bool);
     void setFileClose(const QString& s, int lastIndex);

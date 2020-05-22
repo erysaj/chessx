@@ -276,7 +276,7 @@ void DatabaseList::setFavoriteDatabase(QString fname)
 
 void DatabaseList::setFileFavorite(const QString& s)
 {
-    m_model->addFavoriteFile(s, true, 0);
+    m_model->registry()->makeFavorite(s);
     emit raiseRequest();
 }
 
