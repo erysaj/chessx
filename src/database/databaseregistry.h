@@ -32,13 +32,10 @@ public:
 
     DatabaseListEntry(const QString& path);
 
-    QString m_path;
-    QString m_name;
-
-    DatabaseListEntryState m_state;
-    int     m_stars;
-    bool    m_utf8;
-    int     m_lastGameIndex;
+    QString identifier() const { return m_path; }
+    QString path() const { return m_path; }
+    QString name() const { return m_name; }
+    DatabaseListEntryState state() const { return m_state; }
 
     bool isFavorite() const;
     void setIsFavorite(bool isFavorite);
@@ -62,6 +59,16 @@ public:
 
     QString encodeAttributes() const;
     void decodeAttributes(const QString& data);
+
+private:
+    QString m_path;
+    QString m_name;
+
+public:
+    DatabaseListEntryState m_state;
+    int     m_stars;
+    bool    m_utf8;
+    int     m_lastGameIndex;
 };
 
 class DatabaseRegistry: public QObject

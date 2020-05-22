@@ -50,13 +50,13 @@ void DatabaseRegistry::setStartupDatabase(const QString& identifier)
     {
         // startup database is marked 5 stars
         // there should be only 1 such database
-        if (item->m_path == identifier)
+        if (item->identifier() == identifier)
         {
-            setStars(item->m_path, 5);
+            setStars(item->identifier(), 5);
         }
         else if (item->m_stars > 4)
         {
-            setStars(item->m_path, 4);
+            setStars(item->identifier(), 4);
         }
     }
 }
@@ -124,11 +124,11 @@ void DatabaseRegistry::setLastGame(const QString& identifier, int value)
 
 void DatabaseRegistry::insert(DatabaseListEntry* item)
 {
-    auto path = item->m_path;
-    Q_ASSERT(!m_items.contains(path));
-    m_items[path] = item;
+    auto identifier = item->identifier();
+    Q_ASSERT(!m_items.contains(identifier));
+    m_items[identifier] = item;
     item->setParent(this);
-    emit didInsert(path);
+    emit didInsert(identifier);
 }
 
 void DatabaseRegistry::onDatabaseOpen(const QString& identifier, bool utf8)
@@ -181,7 +181,7 @@ void DatabaseRegistry::saveFavorites(IConfigSection& cfg) const
         auto item = m_items[identifier];
         if (!item->isFavorite())
             continue;
-        files.append(item->m_path);
+        files.append(item->path());
         attrs.append(item->encodeAttributes());
         games.append(QString::number(item->m_lastGameIndex));
     }

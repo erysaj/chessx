@@ -123,28 +123,28 @@ QVariant DatabaseListModel::data(const QModelIndex &index, int role) const
             return QVariant();
         case DBLV_NAME:
         {
-            QString s = db.m_name;
+            QString s = db.name();
             if (s.endsWith(".pgn")) s.remove(".pgn");
             return s;
         }
         case DBLV_SIZE:
         {
-            return formatFileSize(DatabaseInfo::GetDatabaseSize(db.m_path));
+            return formatFileSize(DatabaseInfo::GetDatabaseSize(db.path()));
         }
         case DBLV_DATE:
         {
-            QFileInfo f(db.m_path);
+            QFileInfo f(db.path());
             return f.lastModified().date().toString(Qt::ISODate);
         }
         case DBLV_DATE_READ:
         {
-            QFileInfo f(db.m_path);
+            QFileInfo f(db.path());
             return f.lastRead().date().toString(Qt::ISODate);
         }
         case DBLV_OPEN:
             return QVariant();
         case DBLV_PATH:
-            return db.m_path;
+            return db.path();
         case DBLV_UTF8:
             return db.classType();
         default:
@@ -173,7 +173,7 @@ QVariant DatabaseListModel::data(const QModelIndex &index, int role) const
         }
         case DBLV_PATH:
         {
-            QString s = db.m_name;
+            QString s = db.name();
             return s;
         }
         case DBLV_OPEN:
@@ -187,23 +187,23 @@ QVariant DatabaseListModel::data(const QModelIndex &index, int role) const
         }
         case DBLV_NAME:
         {
-            QString s = db.m_name;
+            QString s = db.name();
             s[0] = s[0].toUpper();
             return s;
         }
         case DBLV_DATE:
         {
-            QFileInfo f(db.m_path);
+            QFileInfo f(db.path());
             return f.lastModified();
         }
         case DBLV_DATE_READ:
         {
-            QFileInfo f(db.m_path);
+            QFileInfo f(db.path());
             return f.lastRead();
         }
         case DBLV_SIZE:
         {
-            return formatFileSize(DatabaseInfo::GetDatabaseSize(db.m_path));
+            return formatFileSize(DatabaseInfo::GetDatabaseSize(db.path()));
         }
         default:
             break;
@@ -220,12 +220,12 @@ QVariant DatabaseListModel::data(const QModelIndex &index, int role) const
         }
         case DBLV_PATH:
         {
-            QString s = db.m_name;
+            QString s = db.name();
             return s;
         }
         case DBLV_OPEN:
         {
-            bool bIsOpen = db.m_state == EDBL_OPEN;
+            bool bIsOpen = db.state() == EDBL_OPEN;
             return QString(bIsOpen ? "Open" : "Closed");
         }
         case DBLV_UTF8:
@@ -234,23 +234,23 @@ QVariant DatabaseListModel::data(const QModelIndex &index, int role) const
         }
         case DBLV_NAME:
         {
-            QString s = db.m_name;
+            QString s = db.name();
             s[0] = s[0].toUpper();
             return s;
         }
         case DBLV_DATE:
         {
-            QFileInfo f(db.m_path);
+            QFileInfo f(db.path());
             return f.lastModified();
         }
         case DBLV_DATE_READ:
         {
-            QFileInfo f(db.m_path);
+            QFileInfo f(db.path());
             return f.lastRead();
         }
         case DBLV_SIZE:
         {
-            return DatabaseInfo::GetDatabaseSize(db.m_path);
+            return DatabaseInfo::GetDatabaseSize(db.path());
         }
         default:
             break;
@@ -339,7 +339,7 @@ void DatabaseListModel::slotItemChanged(int index, quint32 updates)
         auto item = m_registry->itemAt(index);
         if (item->isFavorite())
         {
-            setFileCurrent(item->m_path);
+            setFileCurrent(item->path());
         }
     }
 
