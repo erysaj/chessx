@@ -394,7 +394,7 @@ void DatabaseListModel::setFileUtf8(const QString& s, bool utf8)
 void DatabaseListModel::setFileCurrent(const QString& s)
 {
     auto prev = m_currentRow;
-    auto next = m_registry->m_identifiers.indexOf(s);
+    auto next = m_registry->indexOf(s);
     if (next == prev)
         return;
 
@@ -409,7 +409,7 @@ void DatabaseListModel::setFileCurrent(const QString& s)
 
 void DatabaseListModel::update(const QString& s)
 {
-    auto row = m_registry->m_identifiers.indexOf(s);
+    auto row = m_registry->indexOf(s);
     update(row);
 }
 

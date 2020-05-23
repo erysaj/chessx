@@ -83,6 +83,7 @@ public:
 
     int itemsCount() const { return m_identifiers.size(); }
     DatabaseListEntry* itemAt(int index) const;
+    int indexOf(const QString& identifier) const { return m_identifiers.indexOf(identifier); }
 
     QList<DatabaseInfo*> databases() const { return m_databases; }
     DatabaseInfo* findDisplayName(QString path) const;
@@ -111,9 +112,9 @@ signals:
 
 public: // TODO: make private
     QList<DatabaseInfo*> m_databases;
-    QList<QString> m_identifiers;
 
 private:
+    QList<QString> m_identifiers;
     QHash<QString, DatabaseListEntry*> m_items;
 };
 
