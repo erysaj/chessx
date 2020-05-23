@@ -90,6 +90,7 @@ public:
     QList<DatabaseInfo*> databases() const { return m_databases; }
     DatabaseInfo* findDisplayName(QString path) const;
     void remove(DatabaseInfo* dbi);
+    DatabaseInfo* clipDbInfo() const { return m_databases[0]; }
 
     DatabaseListEntry* findByPath(QString path) const;
     void setStartupDatabase(const QString& identifier);

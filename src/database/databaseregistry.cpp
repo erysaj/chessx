@@ -3,6 +3,7 @@
 #include <QUndoGroup>
 
 #include "databaseinfo.h"
+#include "clipboarddatabase.h"
 
 DatabaseListEntry::DatabaseListEntry(const QString& path)
     : m_path(path)
@@ -17,6 +18,10 @@ DatabaseListEntry::DatabaseListEntry(const QString& path)
 DatabaseRegistry::DatabaseRegistry()
     : m_undoGroup(new QUndoGroup(this))
 {
+    auto clipDb = new DatabaseInfo(m_undoGroup, new ClipboardDatabase);
+    m_databases.append(clipDb);
+
+    onDatabaseOpen(clipDb->database()->name(), false);
 
 }
 

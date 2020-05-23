@@ -123,9 +123,8 @@ MainWindow::MainWindow() : QMainWindow(),
     connect(m_dragTimer, SIGNAL(timeout()), this, SLOT(slotAutoSwitchTab()));
 
     /* Create clipboard database */
-    DatabaseInfo* pClipDB = new DatabaseInfo(m_registry->m_undoGroup, new ClipboardDatabase);
+    DatabaseInfo* pClipDB = m_registry->clipDbInfo();
     connectDatabase(pClipDB);
-    m_registry->m_databases.append(pClipDB);
     m_currentDatabase = pClipDB;
 
     /* Game List */
@@ -301,7 +300,6 @@ MainWindow::MainWindow() : QMainWindow(),
     connect(m_databaseList, SIGNAL(requestMakeBook(QString)),
             this, SLOT(slotMakeBook(QString)));
 
-    m_registry->onDatabaseOpen(pClipDB->database()->name(), false);
     m_databaseList->setFileCurrent(pClipDB->database()->name());
 
     restoreRecentFiles();
