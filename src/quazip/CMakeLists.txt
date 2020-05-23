@@ -43,7 +43,7 @@ target_include_directories(quazip
 
 target_link_libraries(quazip
   PRIVATE
-    qt_config
+    project_options
   PUBLIC
     ZLIB::ZLIB
     Qt5::Core

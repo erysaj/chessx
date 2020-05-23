@@ -17,7 +17,7 @@ target_include_directories(bitboard
 
 target_link_libraries(bitboard
   PRIVATE
-    qt_config
+    project_options
   PUBLIC
     Qt5::Core
 )
@@ -60,7 +60,7 @@ target_include_directories(board
 
 target_link_libraries(board
   PRIVATE
-    qt_config
+    project_options
   PUBLIC
     bitboard
 )
@@ -74,7 +74,7 @@ add_library(eco STATIC
 
 target_link_libraries(eco
   PRIVATE
-    qt_config
+    project_options
   PUBLIC
     board
     Qt5::Core
@@ -113,7 +113,7 @@ add_library(database-core STATIC
 
 target_link_libraries(database-core
   PRIVATE
-    qt_config
+    project_options
     eco
   PUBLIC
     board
@@ -229,7 +229,7 @@ target_include_directories(database
 
 target_link_libraries(database
   PRIVATE
-    qt_config
+    project_options
     Qt5::Widgets
   PUBLIC
     database-core
@@ -248,7 +248,7 @@ if (ENABLE_SCID_SUPPORT)
 
   target_link_libraries(database-scid
     PRIVATE
-      qt_config
+      project_options
       scid
     PUBLIC
       database-core
@@ -431,7 +431,7 @@ target_include_directories(gui
 
 target_link_libraries(gui
   PRIVATE
-    qt_config
+    project_options
     eco
     quazip
     Qt5::PrintSupport

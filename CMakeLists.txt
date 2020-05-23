@@ -1,26 +1,41 @@
 cmake_minimum_required(VERSION 3.10)
 
-set(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
-
 project(chessx LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Link this 'library' to set the c++ standard / compile-time options requested
+add_library(project_options INTERFACE)
+target_compile_features(project_options INTERFACE cxx_std_11)
+target_compile_definitions(project_options INTERFACE
+  QT_DEPRECATED_WARNINGS
+  QT_NO_CAST_TO_ASCII
+  QT_USE_QSTRINGBUILDER
+)
+
+# Link this 'library' to use the warnings specified in CompilerWarnings.cmake
+add_library(project_warnings INTERFACE)
+
+# standard compiler warnings
+include(cmake/CompilerWarnings.cmake)
+set_project_warnings(project_warnings)
+
+# sanitizer options if supported by compiler
+include(cmake/Sanitizers.cmake)
+enable_sanitizers(project_options)
+
+# allow for static analysis options
+include(cmake/StaticAnalyzers.cmake)
+
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
+
 option(ENABLE_SOUNDS "Enable sounds (requires Qt5::Multimedia)" ON)
 option(ENABLE_TTS "Enable text-to-speech (requires Qt5::TextToSpeech)" ON)
 option(ENABLE_SCID_SUPPORT "Enable support for Scid database format (*.si4)" ON)
 
 add_subdirectory(dep)
-
-# common definitions to use with Qt
-add_library(qt_config INTERFACE)
-target_compile_definitions(qt_config INTERFACE
-  QT_DEPRECATED_WARNINGS
-  QT_NO_CAST_TO_ASCII
-  QT_USE_QSTRINGBUILDER
-)
 
 set(REQUIRED_QT_COMPONENTS
   Core Xml DBus Network OpenGL Svg PrintSupport Gui Widgets
@@ -39,9 +54,6 @@ find_package(Qt5 REQUIRED
   "${REQUIRED_QT_COMPONENTS}"
   Test
 ) 
-
-# TODO: enable warnings
-# CONFIG += warn_on
 
 # put translations.rc alongside generated .qm files
 configure_file(translations.qrc ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
@@ -104,7 +116,7 @@ add_executable(chessx WIN32
 )
 
 target_link_libraries(chessx PRIVATE
-  qt_config
+  project_options
   quazip
   bitboard
   board
