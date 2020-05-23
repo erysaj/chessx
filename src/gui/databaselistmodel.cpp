@@ -101,9 +101,8 @@ QVariant DatabaseListModel::data(const QModelIndex &index, int role) const
         }
         case DBLV_OPEN:
         {
-            bool bIsOpen = db.m_state == DatabaseListEntry::EDBL_OPEN;
             bool bIsCurrent = m_currentRow == index.row();
-            if(bIsOpen)
+            if(db.isOpen())
             {
                 return QPixmap(bIsCurrent ? ":/images/folder_new.png" : ":/images/fileopen.png");
             }
@@ -179,8 +178,7 @@ QVariant DatabaseListModel::data(const QModelIndex &index, int role) const
         }
         case DBLV_OPEN:
         {
-            bool bIsOpen = db.m_state == DatabaseListEntry::EDBL_OPEN;
-            return QString(bIsOpen ? tr("Open") : tr("Closed"));
+            return QString(db.isOpen() ? tr("Open") : tr("Closed"));
         }
         case DBLV_UTF8:
         {
@@ -226,8 +224,7 @@ QVariant DatabaseListModel::data(const QModelIndex &index, int role) const
         }
         case DBLV_OPEN:
         {
-            bool bIsOpen = db.state() == DatabaseListEntry::EDBL_OPEN;
-            return QString(bIsOpen ? "Open" : "Closed");
+            return QString(db.isOpen() ? "Open" : "Closed");
         }
         case DBLV_UTF8:
         {

@@ -38,6 +38,8 @@ public:
     QString name() const { return m_name; }
     State state() const { return m_state; }
 
+    bool isOpen() const { return m_state == EDBL_OPEN; }
+
     bool isFavorite() const;
     void setIsFavorite(bool isFavorite);
 
