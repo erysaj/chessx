@@ -1,4 +1,7 @@
 #include "databaseregistry.h"
+
+#include <QUndoGroup>
+
 #include "databaseinfo.h"
 
 DatabaseListEntry::DatabaseListEntry(const QString& path)
@@ -9,6 +12,12 @@ DatabaseListEntry::DatabaseListEntry(const QString& path)
     , m_utf8(false)
     , m_lastGameIndex(0)
 {
+}
+
+DatabaseRegistry::DatabaseRegistry()
+    : m_undoGroup(new QUndoGroup(this))
+{
+
 }
 
 DatabaseRegistry::~DatabaseRegistry()

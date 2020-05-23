@@ -3258,7 +3258,7 @@ void MainWindow::slotDatabaseFindDuplicates(QList<GameId> gameIndexList)
 
 void MainWindow::slotDatabaseChanged()
 {
-    m_undoGroup.setActiveStack(databaseInfo()->undoStack());
+    m_registry->m_undoGroup->setActiveStack(databaseInfo()->undoStack());
     database()->index()->calculateCache();
     setWindowTitle(tr("%1 - ChessX").arg(databaseName()));
     m_gameList->setFilter(databaseInfo()->filter());

@@ -123,7 +123,7 @@ MainWindow::MainWindow() : QMainWindow(),
     connect(m_dragTimer, SIGNAL(timeout()), this, SLOT(slotAutoSwitchTab()));
 
     /* Create clipboard database */
-    DatabaseInfo* pClipDB = new DatabaseInfo(&m_undoGroup, new ClipboardDatabase);
+    DatabaseInfo* pClipDB = new DatabaseInfo(m_registry->m_undoGroup, new ClipboardDatabase);
     connectDatabase(pClipDB);
     m_registry->m_databases.append(pClipDB);
     m_currentDatabase = pClipDB;
@@ -1106,7 +1106,7 @@ void MainWindow::openDatabaseFile(QString fname, bool utf8)
     }
 
     // Create database, connect progress bar and open file
-    DatabaseInfo* db = new DatabaseInfo(&m_undoGroup,fname);
+    DatabaseInfo* db = new DatabaseInfo(m_registry->m_undoGroup,fname);
     QString basefile = fi.completeBaseName();
 
     startOperation(tr("Opening %1...").arg(basefile));
@@ -1387,8 +1387,8 @@ void MainWindow::setupActions()
     QToolBar* editToolBar = addToolBar(tr("Edit"));
     editToolBar->setObjectName("EditToolBar");
 
-    QAction *undoAction = m_undoGroup.createUndoAction(this, tr("Undo"));
-    QAction *redoAction = m_undoGroup.createRedoAction(this, tr("Redo"));
+    QAction *undoAction = m_registry->m_undoGroup->createUndoAction(this, tr("Undo"));
+    QAction *redoAction = m_registry->m_undoGroup->createRedoAction(this, tr("Redo"));
     undoAction->setShortcut(Qt::CTRL + Qt::Key_Z);
     redoAction->setShortcuts({Qt::CTRL + Qt::Key_Y, Qt::CTRL + Qt::SHIFT + Qt::Key_Z});
     undoAction->setIcon(QIcon(":/images/undo.png"));

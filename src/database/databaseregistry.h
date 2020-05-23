@@ -8,6 +8,7 @@
 
 #include "config.h"
 
+class QUndoGroup;
 class DatabaseInfo;
 
 class DatabaseListEntry: public QObject
@@ -79,6 +80,7 @@ class DatabaseRegistry: public QObject
     Q_OBJECT
 
 public:
+    DatabaseRegistry();
     ~DatabaseRegistry();
 
     int itemsCount() const { return m_identifiers.size(); }
@@ -112,6 +114,7 @@ signals:
 
 public: // TODO: make private
     QList<DatabaseInfo*> m_databases;
+    QUndoGroup* m_undoGroup;
 
 private:
     QList<QString> m_identifiers;

@@ -720,7 +720,6 @@ private:
     QAction* m_autoAnalysis;
     QAction* m_engineMatch;
     QAction* m_match;
-    QUndoGroup m_undoGroup;
     QNetworkAccessManager* m_manager;
     DownloadManager* downloadManager;
     DownloadManager* downloadManager2;
