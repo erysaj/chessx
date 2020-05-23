@@ -10,17 +10,18 @@
 
 class DatabaseInfo;
 
-enum DatabaseListEntryState
-{
-    EDBL_OPEN,     ///< Database is open
-    EDBL_CLOSE     ///< Database is closed
-};
-
 class DatabaseListEntry: public QObject
 {
     Q_OBJECT
 
 public:
+    enum State
+    {
+        EDBL_OPEN,     ///< Database is open
+        EDBL_CLOSE     ///< Database is closed
+    };
+
+
     enum AttrMask: quint32
     {
         AttrMask_State      = 1 << 0,
@@ -35,7 +36,7 @@ public:
     QString identifier() const { return m_path; }
     QString path() const { return m_path; }
     QString name() const { return m_name; }
-    DatabaseListEntryState state() const { return m_state; }
+    State state() const { return m_state; }
 
     bool isFavorite() const;
     void setIsFavorite(bool isFavorite);
@@ -65,7 +66,7 @@ private:
     QString m_name;
 
 public:
-    DatabaseListEntryState m_state;
+    State m_state;
     int     m_stars;
     bool    m_utf8;
     int     m_lastGameIndex;
@@ -88,7 +89,7 @@ public:
     DatabaseListEntry* findByPath(QString path) const;
     void setStartupDatabase(const QString& identifier);
 
-    void setState   (const QString& identifier, DatabaseListEntryState value);
+    void setState   (const QString& identifier, DatabaseListEntry::State value);
     void setStars   (const QString& identifier, int value);
     void setUtf8    (const QString& identifier, bool value);
     void setLastGame(const QString& identifier, int value);

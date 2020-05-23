@@ -101,7 +101,7 @@ QVariant DatabaseListModel::data(const QModelIndex &index, int role) const
         }
         case DBLV_OPEN:
         {
-            bool bIsOpen = db.m_state == EDBL_OPEN;
+            bool bIsOpen = db.m_state == DatabaseListEntry::EDBL_OPEN;
             bool bIsCurrent = m_currentRow == index.row();
             if(bIsOpen)
             {
@@ -179,7 +179,7 @@ QVariant DatabaseListModel::data(const QModelIndex &index, int role) const
         }
         case DBLV_OPEN:
         {
-            bool bIsOpen = db.m_state == EDBL_OPEN;
+            bool bIsOpen = db.m_state == DatabaseListEntry::EDBL_OPEN;
             return QString(bIsOpen ? tr("Open") : tr("Closed"));
         }
         case DBLV_UTF8:
@@ -226,7 +226,7 @@ QVariant DatabaseListModel::data(const QModelIndex &index, int role) const
         }
         case DBLV_OPEN:
         {
-            bool bIsOpen = db.state() == EDBL_OPEN;
+            bool bIsOpen = db.state() == DatabaseListEntry::EDBL_OPEN;
             return QString(bIsOpen ? "Open" : "Closed");
         }
         case DBLV_UTF8:
@@ -386,7 +386,7 @@ void DatabaseListModel::setStars(const QString &s, int stars)
 void DatabaseListModel::setFileClose(const QString& s, int lastIndex)
 {
     m_registry->setLastGame(s, lastIndex);
-    m_registry->setState(s, EDBL_CLOSE);
+    m_registry->setState(s, DatabaseListEntry::EDBL_CLOSE);
 }
 
 void DatabaseListModel::setFileUtf8(const QString& s, bool utf8)

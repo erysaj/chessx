@@ -61,7 +61,7 @@ void DatabaseRegistry::setStartupDatabase(const QString& identifier)
     }
 }
 
-void DatabaseRegistry::setState(const QString& identifier, DatabaseListEntryState value)
+void DatabaseRegistry::setState(const QString& identifier, DatabaseListEntry::State value)
 {
     auto index = m_identifiers.indexOf(identifier);
     if (index < 0)
@@ -143,13 +143,13 @@ void DatabaseRegistry::onDatabaseOpen(const QString& identifier, bool utf8)
         // insert new entry
         auto item = new DatabaseListEntry(identifier);
         item->m_utf8 = utf8;
-        item->m_state = EDBL_OPEN;
+        item->m_state = DatabaseListEntry::EDBL_OPEN;
         insert(item);
     }
     else
     {
         // update existing entry
-        setState(identifier, EDBL_OPEN);
+        setState(identifier, DatabaseListEntry::EDBL_OPEN);
         setUtf8(identifier, utf8);
     }
 }
