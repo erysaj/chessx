@@ -652,6 +652,8 @@ private:
     bool handleGameEnd(const Analysis& analysis, QAction* action);
     bool gameAddAnalysis(const Analysis& analysis, QString annotation);
     QString scoreText(const Analysis& analysis);
+    /** setup connections to newly opened database */
+    void connectDatabase(DatabaseInfo* dbInfo);
 
     /* Dialogs  */
     GameList* m_gameList;

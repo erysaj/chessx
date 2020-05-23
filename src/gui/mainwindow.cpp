@@ -124,10 +124,7 @@ MainWindow::MainWindow() : QMainWindow(),
 
     /* Create clipboard database */
     DatabaseInfo* pClipDB = new DatabaseInfo(&m_undoGroup, new ClipboardDatabase);
-    connect(pClipDB,SIGNAL(signalRestoreState(GameX)), SLOT(slotDbRestoreState(GameX)));
-    connect(pClipDB,SIGNAL(signalGameModified(bool)), SLOT(slotGameChanged(bool)));
-    connect(pClipDB,SIGNAL(signalMoveChanged()), SLOT(slotMoveChanged()));
-    connect(pClipDB,SIGNAL(signalGameModified(bool)), SIGNAL(signalGameModified(bool)));
+    connectDatabase(pClipDB);
     m_registry->m_databases.append(pClipDB);
     m_currentDatabase = pClipDB;
 
@@ -507,6 +504,14 @@ MainWindow::MainWindow() : QMainWindow(),
     {
         showNormal();
     }
+}
+
+void MainWindow::connectDatabase(DatabaseInfo* dbInfo)
+{
+    connect(dbInfo,SIGNAL(signalRestoreState(GameX)), SLOT(slotDbRestoreState(GameX)));
+    connect(dbInfo,SIGNAL(signalGameModified(bool)), SLOT(slotGameChanged(bool)));
+    connect(dbInfo,SIGNAL(signalMoveChanged()), SLOT(slotMoveChanged()));
+    connect(dbInfo,SIGNAL(signalGameModified(bool)), SIGNAL(signalGameModified(bool)));
 }
 
 void MainWindow::setupAnalysisWidget(DockWidgetEx* analysisDock, AnalysisWidget* analysis)
@@ -1107,10 +1112,7 @@ void MainWindow::openDatabaseFile(QString fname, bool utf8)
     startOperation(tr("Opening %1...").arg(basefile));
     connect(db->database(), SIGNAL(progress(int)), SLOT(slotOperationProgress(int)), Qt::QueuedConnection);
     connect(db, SIGNAL(LoadFinished(DatabaseInfo*)), this, SLOT(slotDataBaseLoaded(DatabaseInfo*)), Qt::QueuedConnection);
-    connect(db, SIGNAL(signalRestoreState(GameX)), SLOT(slotDbRestoreState(GameX)));
-    connect(db, SIGNAL(signalGameModified(bool)), SLOT(slotGameChanged(bool)));
-    connect(db, SIGNAL(signalMoveChanged()), SLOT(slotMoveChanged()));
-    connect(db, SIGNAL(signalGameModified(bool)), SIGNAL(signalGameModified(bool)));
+    connectDatabase(db);
     if(!db->open(utf8))
     {
         slotDataBaseLoaded(db);
