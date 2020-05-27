@@ -365,8 +365,12 @@ public slots:
     void slotDatabaseChanged();
     /** Delete current game. */
     void slotDatabaseDeleteGame(QList<GameId> gameIndexList);
-    /** Slot that updates internal info upon loading a complete db */
-    void slotDataBaseLoaded(DatabaseInfo* db);
+    /** Database began loading */
+    void slotDatabaseOpenInitiated(DatabaseInfo* db);
+    /** Database successfully opened */
+    void slotDatabaseOpenSuccess(DatabaseInfo* db);
+    /** Database loading failed */
+    void slotDatabaseOpenFailure(DatabaseInfo* db);
     /** Restore game state from a undo or redo operation */
     void slotDbRestoreState(const GameX&);
     /** Fill up the current game (drag request from game list) */

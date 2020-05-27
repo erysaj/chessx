@@ -109,10 +109,15 @@ public:
     void onDatabaseOpen(const QString& identifier, bool utf8);
     void makeFavorite(const QString& identifier);
 
+    void openFile(const QString& path, bool utf8);
+
 signals:
     void itemsInsertBegan(int first, int last);
     void itemsInsertEnded(int first, int last);
     void itemChanged(int index, quint32 updates);
+    void dbOpen(DatabaseInfo* dbi);
+    void dbOpenSuccess(DatabaseInfo* dbi);
+    void dbOpenFailure(DatabaseInfo* dbi);
 
 public: // TODO: make private
     QList<DatabaseInfo*> m_databases;
@@ -122,6 +127,9 @@ public: // TODO: make private
 private:
     QList<QString> m_identifiers;
     QHash<QString, DatabaseListEntry*> m_items;
+
+private slots:
+    void slotDataBaseLoaded(DatabaseInfo* db);
 };
 
 #endif

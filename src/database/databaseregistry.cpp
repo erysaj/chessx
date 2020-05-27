@@ -188,6 +188,23 @@ void DatabaseRegistry::makeFavorite(const QString& identifier)
     }
 }
 
+void DatabaseRegistry::openFile(const QString& path, bool utf8)
+{
+    // Create database, connect progress bar and open file
+    DatabaseInfo* db = new DatabaseInfo(m_undoGroup, path);
+    connect(db, SIGNAL(LoadFinished(DatabaseInfo*)), this, SLOT(slotDataBaseLoaded(DatabaseInfo*)), Qt::QueuedConnection);
+    emit dbOpen(db);
+
+    if(!db->open(utf8))
+    {
+        slotDataBaseLoaded(db);
+    }
+    else
+    {
+        m_databases.append(db);
+    }
+}
+
 void DatabaseRegistry::saveFavorites(IConfig& cfg) const
 {
     QStringList files;
@@ -237,6 +254,23 @@ void DatabaseRegistry::loadFavorites(const IConfig& cfg)
     for (auto item: items)
     {
         insert(item);
+    }
+}
+
+void DatabaseRegistry::slotDataBaseLoaded(DatabaseInfo* db)
+{
+    if (db->IsLoaded())
+    {
+        QString fname = db->displayName();
+        onDatabaseOpen(fname, db->IsUtf8());
+        m_recentFiles.append(fname);
+        emit dbOpenSuccess(db);
+    }
+    else
+    {
+        emit dbOpenFailure(db);
+        m_databases.removeOne(db);
+        delete db;
     }
 }
 

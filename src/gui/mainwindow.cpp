@@ -106,6 +106,9 @@ MainWindow::MainWindow() : QMainWindow(),
 {
     setObjectName("MainWindow");
     m_registry = new DatabaseRegistry();
+    connect(m_registry, SIGNAL(dbOpen(DatabaseInfo*)), this, SLOT(slotDatabaseOpenInitiated(DatabaseInfo*)));
+    connect(m_registry, SIGNAL(dbOpenSuccess(DatabaseInfo*)), this, SLOT(slotDatabaseOpenSuccess(DatabaseInfo*)));
+    connect(m_registry, SIGNAL(dbOpenFailure(DatabaseInfo*)), this, SLOT(slotDatabaseOpenFailure(DatabaseInfo*)));
 
     // Style::setStyle(this);
     m_messageTimer = new QTimer(this);
@@ -1098,23 +1101,7 @@ void MainWindow::openDatabaseFile(QString fname, bool utf8)
         /* Check if the database is already open */
         return;
     }
-
-    // Create database, connect progress bar and open file
-    DatabaseInfo* db = new DatabaseInfo(m_registry->m_undoGroup,fname);
-    QString basefile = fi.completeBaseName();
-
-    startOperation(tr("Opening %1...").arg(basefile));
-    connect(db->database(), SIGNAL(progress(int)), SLOT(slotOperationProgress(int)), Qt::QueuedConnection);
-    connect(db, SIGNAL(LoadFinished(DatabaseInfo*)), this, SLOT(slotDataBaseLoaded(DatabaseInfo*)), Qt::QueuedConnection);
-    connectDatabase(db);
-    if(!db->open(utf8))
-    {
-        slotDataBaseLoaded(db);
-    }
-    else
-    {
-        m_registry->m_databases.append(db);
-    }
+    m_registry->openFile(fname, utf8);
 }
 
 void MainWindow::loadError(QUrl url)
@@ -1136,22 +1123,20 @@ void MainWindow::loadReady(QUrl url, QString fileName)
     openDatabaseArchive(fileName, false);
 }
 
-void MainWindow::slotDataBaseLoaded(DatabaseInfo* db)
+void MainWindow::slotDatabaseOpenInitiated(DatabaseInfo* db)
 {
-    if(!db->IsLoaded())
-    {
-        cancelOperation(tr("Cannot open file"));
-        m_registry->m_databases.removeOne(db);
-        delete db;
-        return;
-    }
+    QFileInfo fi = QFileInfo(db->displayName());
+    startOperation(tr("Opening %1...").arg(fi.completeBaseName()));
+    connect(db->database(), SIGNAL(progress(int)), SLOT(slotOperationProgress(int)), Qt::QueuedConnection);
+    connectDatabase(db);
+}
+
+void MainWindow::slotDatabaseOpenSuccess(DatabaseInfo* db)
+{
     QString fname = db->displayName();
-    QFileInfo fi = QFileInfo(fname);
-    QString basefile = fi.completeBaseName();
+    QFileInfo fi = QFileInfo(db->displayName());
 
-    m_registry->onDatabaseOpen(fname, db->IsUtf8());
-
-    finishOperation(tr("%1 opened").arg(basefile));
+    finishOperation(tr("%1 opened").arg(fi.completeBaseName()));
 
     if (!db->IsBook())
     {
@@ -1185,9 +1170,12 @@ void MainWindow::slotDataBaseLoaded(DatabaseInfo* db)
             }
         }
     }
-
-    m_registry->m_recentFiles.append(fname);
     emit signalDatabaseOpenClose();
+}
+
+void MainWindow::slotDatabaseOpenFailure(DatabaseInfo* db)
+{
+    cancelOperation(tr("Cannot open file"));
 }
 
 QString MainWindow::exportFileName(int& format)
