@@ -312,8 +312,8 @@ MainWindow::MainWindow() : QMainWindow(),
     m_databaseList->setFavoriteDatabase(ficsPath());
 
     /* Recent files */
-    m_recentFiles.load(cfg);
-    m_recentFiles.removeMissingFiles();
+    m_registry->m_recentFiles.load(cfg);
+    m_registry->m_recentFiles.removeMissingFiles();
 
     /* Opening Tree */
     DockWidgetEx* openingDock = new DockWidgetEx(tr("Opening Tree"), this);
@@ -598,7 +598,7 @@ void MainWindow::closeEvent(QCloseEvent* e)
     if(confirmQuit())
     {
         SettingsConfig cfg(*AppSettings);
-        m_recentFiles.save(cfg);
+        m_registry->m_recentFiles.save(cfg);
         m_registry->saveFavorites(cfg);
 
         m_gameList->saveConfig();
@@ -844,13 +844,13 @@ void MainWindow::updateMenuRecent()
     if (menu)
     {
         menu->clear();
-        int n = std::min(m_recentFiles.count(), static_cast<int>(MainWindow::MaxRecentFiles));
+        int n = std::min(m_registry->m_recentFiles.count(), static_cast<int>(MainWindow::MaxRecentFiles));
         for(int i = 0; i < n; i++)
         {
             QAction* action = new QAction(menu);
             action->setVisible(true);
-            action->setData(m_recentFiles[i]);
-            action->setText(QString("&%1: %2").arg(i + 1).arg(m_recentFiles[i]));
+            action->setData(m_registry->m_recentFiles[i]);
+            action->setText(QString("&%1: %2").arg(i + 1).arg(m_registry->m_recentFiles[i]));
             connect(action, SIGNAL(triggered()), SLOT(slotFileOpenRecent()));
             menu->addAction(action);
         }
@@ -1186,7 +1186,7 @@ void MainWindow::slotDataBaseLoaded(DatabaseInfo* db)
         }
     }
 
-    m_recentFiles.append(fname);
+    m_registry->m_recentFiles.append(fname);
     emit signalDatabaseOpenClose();
 }
 
@@ -2045,7 +2045,7 @@ void MainWindow::QueryLoadDatabase()
 
 void MainWindow::StartCheckDatabase()
 {
-    if ((m_recentFiles.count() == 0) && !AppSettings->getValue("/General/BuiltinDbInstalled").toBool())
+    if ((m_registry->m_recentFiles.count() == 0) && !AppSettings->getValue("/General/BuiltinDbInstalled").toBool())
     {
         QueryLoadDatabase();
     }

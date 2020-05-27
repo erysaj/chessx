@@ -350,7 +350,7 @@ void MainWindow::slotReconfigure()
     }
 #endif
     SettingsConfig cfg(*AppSettings);
-    m_recentFiles.load(cfg);
+    m_registry->m_recentFiles.load(cfg);
     emit reconfigure(); 	// Re-emit for children
     UpdateGameText();
 }

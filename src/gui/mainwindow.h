@@ -10,7 +10,6 @@
 #ifndef MAINWINDOW_H_INCLUDED
 #define MAINWINDOW_H_INCLUDED
 
-#include "historylist.h"
 #include "output.h"
 #include "engineparameter.h"
 
@@ -682,7 +681,6 @@ private:
 
     /* Local variables */
     DatabaseRegistry *m_registry;
-    HistoryList m_recentFiles;
     
     QPointer<DatabaseInfo> m_currentDatabase;
     QString m_eco;

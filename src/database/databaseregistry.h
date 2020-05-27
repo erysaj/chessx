@@ -7,6 +7,7 @@
 #include <QObject>
 
 #include "config.h"
+#include "historylist.h"
 
 class QUndoGroup;
 class DatabaseInfo;
@@ -116,6 +117,7 @@ signals:
 public: // TODO: make private
     QList<DatabaseInfo*> m_databases;
     QUndoGroup* m_undoGroup;
+    HistoryList m_recentFiles;
 
 private:
     QList<QString> m_identifiers;
