@@ -302,7 +302,9 @@ MainWindow::MainWindow() : QMainWindow(),
 
     m_databaseList->setFileCurrent(pClipDB->database()->name());
 
-    restoreRecentFiles();
+    SettingsConfig cfg(*AppSettings);
+    m_registry->loadFavorites(cfg);
+
     connect(m_databaseList, SIGNAL(raiseRequest()), dbListDock, SLOT(raise()));
     connect(this, SIGNAL(signalGameModeChanged(bool)), m_databaseList, SLOT(setDisabled(bool)));
 
@@ -310,7 +312,6 @@ MainWindow::MainWindow() : QMainWindow(),
     m_databaseList->setFavoriteDatabase(ficsPath());
 
     /* Recent files */
-    SettingsConfig cfg(*AppSettings);
     m_recentFiles.load(cfg);
     m_recentFiles.removeMissingFiles();
 
@@ -1956,12 +1957,6 @@ void MainWindow::SimpleSaveGame()
         saveGame(dbInfo);
         emit databaseModified();
     }
-}
-
-void MainWindow::restoreRecentFiles()
-{
-    SettingsConfig cfg(*AppSettings);
-    m_registry->loadFavorites(cfg);
 }
 
 void MainWindow::loadFileFavorites()

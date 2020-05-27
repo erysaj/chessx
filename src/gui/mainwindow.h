@@ -596,8 +596,6 @@ private:
     void finishOperation(const QString& msg);
     /** Cancel operation with progress reporting. Hides progress bar. */
     void cancelOperation(const QString& msg);
-    /** Restore the list of recent files */
-    void restoreRecentFiles();
     /** Load additional files at startup */
     void loadFileFavorites();
     /** Query User and save game if game was modified
