@@ -188,7 +188,7 @@ void DatabaseRegistry::makeFavorite(const QString& identifier)
     }
 }
 
-void DatabaseRegistry::saveFavorites(IConfigSection& cfg) const
+void DatabaseRegistry::saveFavorites(IConfig& cfg) const
 {
     QStringList files;
     QStringList attrs;
@@ -203,16 +203,16 @@ void DatabaseRegistry::saveFavorites(IConfigSection& cfg) const
         attrs.append(item->encodeAttributes());
         games.append(QString::number(item->m_lastGameIndex));
     }
-    cfg.setValue("Files", files);
-    cfg.setValue("Attributes", attrs);
-    cfg.setValue("LastGameIndex", games);
+    cfg.setValue("Favorites/Files", files);
+    cfg.setValue("Favorites/Attributes", attrs);
+    cfg.setValue("Favorites/LastGameIndex", games);
 }
 
-void DatabaseRegistry::loadFavorites(const IConfigSection& cfg)
+void DatabaseRegistry::loadFavorites(const IConfig& cfg)
 {
-    auto files = cfg.value("Files").toStringList();
-    auto attrs = cfg.value("Attributes").toStringList();
-    auto games = cfg.value("LastGameIndex").toList();
+    auto files = cfg.value("Favorites/Files").toStringList();
+    auto attrs = cfg.value("Favorites/Attributes").toStringList();
+    auto games = cfg.value("Favorites/LastGameIndex").toList();
 
     QList<DatabaseListEntry*> items;
     for (const auto& path: files)

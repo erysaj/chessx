@@ -598,11 +598,8 @@ void MainWindow::closeEvent(QCloseEvent* e)
         m_recentFiles.save();
         // save favorites
         {
-            SettingsConfigSection cfg(*AppSettings);
-
-            AppSettings->beginGroup("Favorites");
+            SettingsConfig cfg(*AppSettings);
             m_registry->saveFavorites(cfg);
-            AppSettings->endGroup();
         }
 
         m_gameList->saveConfig();
@@ -1965,11 +1962,8 @@ void MainWindow::SimpleSaveGame()
 
 void MainWindow::restoreRecentFiles()
 {
-    SettingsConfigSection cfg(*AppSettings);
-
-    AppSettings->beginGroup("Favorites");
+    SettingsConfig cfg(*AppSettings);
     m_registry->loadFavorites(cfg);
-    AppSettings->endGroup();
 }
 
 void MainWindow::loadFileFavorites()

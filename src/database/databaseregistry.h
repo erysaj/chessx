@@ -102,8 +102,8 @@ public:
 
     void insert(DatabaseListEntry* item);
 
-    void saveFavorites(IConfigSection& cfg) const;
-    void loadFavorites(const IConfigSection& cfg);
+    void saveFavorites(IConfig& cfg) const;
+    void loadFavorites(const IConfig& cfg);
 
     void onDatabaseOpen(const QString& identifier, bool utf8);
     void makeFavorite(const QString& identifier);

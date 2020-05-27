@@ -8,11 +8,11 @@
 
 
 /** @ingroup Core
-  IConfigSection interface abstracts an access to a single section in settings file.
+  IConfig interface abstracts an access to a settings file.
 */
-struct IConfigSection
+struct IConfig
 {
-    virtual ~IConfigSection() {}
+    virtual ~IConfig() {}
 
     virtual void setValue(const QString &key, const QVariant &value) = 0;
     virtual QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const = 0;
@@ -21,10 +21,10 @@ struct IConfigSection
 };
 
 
-class SettingsConfigSection: public IConfigSection
+class SettingsConfig: public IConfig
 {
 public:
-    SettingsConfigSection(QSettings& settings)
+    SettingsConfig(QSettings& settings)
         : m_settings(settings)
     {}
 
@@ -38,7 +38,7 @@ private:
 };
 
 
-class InMemoryConfigSection: public IConfigSection
+class InMemoryConfig: public IConfig
 {
 public:
     void setValue(const QString &key, const QVariant &value) override;
