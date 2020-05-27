@@ -5,6 +5,7 @@
 #include <QList>
 #include <QHash>
 #include <QObject>
+#include <QPointer>
 
 #include "config.h"
 #include "historylist.h"
@@ -123,6 +124,7 @@ public: // TODO: make private
     QList<DatabaseInfo*> m_databases;
     QUndoGroup* m_undoGroup;
     HistoryList m_recentFiles;
+    QPointer<DatabaseInfo> m_currentDatabase;
 
 private:
     QList<QString> m_identifiers;

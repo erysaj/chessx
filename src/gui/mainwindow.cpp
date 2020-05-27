@@ -128,7 +128,7 @@ MainWindow::MainWindow() : QMainWindow(),
     /* Create clipboard database */
     DatabaseInfo* pClipDB = m_registry->clipDbInfo();
     connectDatabase(pClipDB);
-    m_currentDatabase = pClipDB;
+    m_registry->m_currentDatabase = pClipDB;
 
     /* Game List */
     DockWidgetEx* gameListDock = new DockWidgetEx(tr("Game List"), this);
@@ -731,12 +731,12 @@ void MainWindow::evaluateSanNag(QKeyEvent *e)
 
 DatabaseInfo* MainWindow::databaseInfo()
 {
-    return m_currentDatabase;
+    return m_registry->m_currentDatabase;
 }
 
 const DatabaseInfo* MainWindow::databaseInfo() const
 {
-    return m_currentDatabase;
+    return m_registry->m_currentDatabase;
 }
 
 Database* MainWindow::database()
@@ -863,7 +863,7 @@ void MainWindow::updateMenuDatabases()
                 action->setVisible(true);
                 action->setData(QVariant::fromValue(dbi));
                 action->setText(QString("&%1: %2").arg(n++).arg(dbi->dbName()));
-                if (dbi == m_currentDatabase)
+                if (dbi == m_registry->m_currentDatabase)
                 {
                     action->setCheckable(true);
                     action->setChecked(true);
@@ -1045,13 +1045,13 @@ bool MainWindow::ActivateDatabase(QString fname)
                 if (!dbi->IsBook())
                 {
                     autoGroup->untrigger();
-                    if (dbi != m_currentDatabase)
+                    if (dbi != m_registry->m_currentDatabase)
                     {
-                        m_currentDatabase = dbi;
+                        m_registry->m_currentDatabase = dbi;
                         m_databaseList->setFileCurrent(fname);
                         slotDatabaseChanged();
                     }
-                    activateBoardViewForDbIndex(m_currentDatabase);
+                    activateBoardViewForDbIndex(m_registry->m_currentDatabase);
                 }
             }
             else
@@ -1134,7 +1134,7 @@ void MainWindow::slotDatabaseOpenSuccess(DatabaseInfo* db)
                 if (!dbi->IsBook())
                 {
                     autoGroup->untrigger();
-                    m_currentDatabase = dbi;
+                    m_registry->m_currentDatabase = dbi;
                     CreateBoardView();
                 }
                 break;
@@ -1839,9 +1839,9 @@ bool MainWindow::confirmQuit()
 
 void MainWindow::SwitchToClipboard()
 {
-    if (!m_currentDatabase || !m_currentDatabase->isClipboard())
+    if (!m_registry->m_currentDatabase || !m_registry->m_currentDatabase->isClipboard())
     {
-        m_currentDatabase = m_registry->databases().at(0); // Switch to clipboard is always safe
+        m_registry->m_currentDatabase = m_registry->databases().at(0); // Switch to clipboard is always safe
         activateBoardViewForDbIndex(databaseInfo());
         m_databaseList->setFileCurrent("Clipboard");
         slotDatabaseChanged();

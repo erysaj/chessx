@@ -18,6 +18,7 @@ DatabaseListEntry::DatabaseListEntry(const QString& path)
 
 DatabaseRegistry::DatabaseRegistry()
     : m_undoGroup(new QUndoGroup(this))
+    , m_currentDatabase(nullptr)
 {
     auto clipDb = new ClipboardDatabase;
     auto clipInfo = new DatabaseInfo(m_undoGroup, clipDb);

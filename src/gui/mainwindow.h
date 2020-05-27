@@ -684,7 +684,6 @@ private:
     /* Local variables */
     DatabaseRegistry *m_registry;
     
-    QPointer<DatabaseInfo> m_currentDatabase;
     QString m_eco;
     QTime m_operationTime;
     int m_operationFlag;

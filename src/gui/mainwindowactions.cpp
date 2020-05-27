@@ -207,7 +207,7 @@ void MainWindow::slotFileSave()
         MessageDialog::warning(tr("<html>The database <i>%1</i> is read-only and cannot be saved.</html>")
                                .arg(database()->name()));
     }
-    else if(!m_currentDatabase->isClipboard() && qobject_cast<MemoryDatabase*>(database()))
+    else if(!databaseInfo()->isClipboard() && qobject_cast<MemoryDatabase*>(database()))
     {
         saveDatabase(databaseInfo());
     }
@@ -254,7 +254,7 @@ void MainWindow::slotFileClose()
 void MainWindow::slotFileCloseIndex(int n, bool dontAsk)
 {
     DatabaseInfo* aboutToClose = m_registry->databases().at(n);
-    if(m_currentDatabase == aboutToClose)
+    if(m_registry->m_currentDatabase == aboutToClose)
     {
         closeDatabaseInfo(aboutToClose, dontAsk);
         SwitchToClipboard();
@@ -1569,8 +1569,8 @@ void MainWindow::saveGame(DatabaseInfo* dbInfo)
 void MainWindow::slotDatabaseModified()
 {
     slotFilterChanged();
-    emit signalCurrentDBisReadWrite((!m_currentDatabase->isClipboard()) && !databaseInfo()->database()->isReadOnly() && databaseInfo()->database()->isModified());
-    emit signalCurrentDBcanBeClosed(!m_currentDatabase->isClipboard());
+    emit signalCurrentDBisReadWrite((!databaseInfo()->isClipboard()) && !databaseInfo()->database()->isReadOnly() && databaseInfo()->database()->isModified());
+    emit signalCurrentDBcanBeClosed(!databaseInfo()->isClipboard());
     emit signalCurrentDBhasGames(database()->index()->count() > 0);
     emit signalGameModified(databaseInfo()->modified());
 }
@@ -2783,7 +2783,7 @@ void MainWindow::slotFilterChanged(bool selectGame)
     quint64 filteredCount = databaseInfo()->filter() ? databaseInfo()->filter()->count() : 0;
     quint64 databaseCount = database()->count();
     QString f = filteredCount == databaseCount ? tr("all") : QString::number(filteredCount);
-    m_statusFilter->setText(QString(" %1: %2/%3 ").arg(m_currentDatabase->dbName())
+    m_statusFilter->setText(QString(" %1: %2/%3 ").arg(databaseInfo()->dbName())
                             .arg(f).arg(database()->count()));
     m_statusFilter->repaint(); // Workaround Bug in Qt 5.11 and 5.12
 }
@@ -2842,11 +2842,11 @@ void MainWindow::slotDatabaseChange()
     if (action)
     {
         DatabaseInfo* db = action->data().value<DatabaseInfo*>();
-        if (m_currentDatabase != db && !db->IsBook())
+        if (m_registry->m_currentDatabase != db && !db->IsBook())
         {
             autoGroup->untrigger();
-            m_currentDatabase = db;
-            activateBoardViewForDbIndex(m_currentDatabase);
+            m_registry->m_currentDatabase = db;
+            activateBoardViewForDbIndex(m_registry->m_currentDatabase);
             m_databaseList->setFileCurrent(databaseInfo()->displayName());
             slotDatabaseChanged();
             if(database()->isReadOnly())
@@ -2854,7 +2854,7 @@ void MainWindow::slotDatabaseChange()
                 const auto dbs = m_registry->databases();
                 for (auto dbi: dbs)
                 {
-                    if (dbi == m_currentDatabase)
+                    if (dbi == m_registry->m_currentDatabase)
                         continue;
                     if (dbi->isValid() && dbi->database()->isReadOnly())
                     {
@@ -2875,7 +2875,7 @@ void MainWindow::copyGame(DatabaseInfo* pTargetDB, DatabaseInfo* pSourceDB, Game
         {
             // The database is open and accessible
             pTargetDB->database()->appendGame(g);
-            if(pTargetDB == m_currentDatabase)
+            if(pTargetDB == m_registry->m_currentDatabase)
             {
                 emit databaseModified();
             }
@@ -2892,7 +2892,7 @@ void MainWindow::copyGames(QString destination, QList<GameId> indexes, QString s
 
     if (pDestDBInfo && pDestDBInfo->isValid() && pSrcDBInfo && pSrcDBInfo->isValid())
     {
-        if (pDestDBInfo==m_currentDatabase)
+        if (pDestDBInfo==m_registry->m_currentDatabase)
         {
             m_gameList->startUpdate();
         }
@@ -2904,7 +2904,7 @@ void MainWindow::copyGames(QString destination, QList<GameId> indexes, QString s
         }
         QString msg = tr("Appended %1 games from %2 to %3.").arg(indexes.count()).arg(source, destination);
         slotStatusMessage(msg);
-        if (pDestDBInfo==m_currentDatabase)
+        if (pDestDBInfo==m_registry->m_currentDatabase)
         {
             m_gameList->endUpdate();
         }
@@ -3143,7 +3143,7 @@ void MainWindow::copyFromDatabase(int preselect, QList<GameId> gameIndexList)
     const auto dbs = m_registry->databases();
     for (auto dbi: dbs)
     {
-        if (dbi == m_currentDatabase)
+        if (dbi == m_registry->m_currentDatabase)
             continue;
         if (!dbi->isNative())
             continue;
@@ -3160,7 +3160,7 @@ void MainWindow::copyFromDatabase(int preselect, QList<GameId> gameIndexList)
     QString players = game().tag(TagNameWhite)+"-"+game().tag(TagNameBlack);
 
     CopyDialog dlg(this);
-    dlg.setCurrentGame(players, gameIndexList.count(), m_currentDatabase->filter()->count(), m_currentDatabase->database()->count());
+    dlg.setCurrentGame(players, gameIndexList.count(), m_registry->m_currentDatabase->filter()->count(), m_registry->m_currentDatabase->database()->count());
     dlg.setMode(static_cast<CopyDialog::SrcMode>(preselect));
     dlg.setDatabases(db);
     if(dlg.exec() != QDialog::Accepted)
@@ -3222,7 +3222,7 @@ void MainWindow::copyFromDatabase(int preselect, QList<GameId> gameIndexList)
 
 void MainWindow::slotDatabaseClearClipboard()
 {
-    if (!m_currentDatabase->isClipboard())
+    if (!m_registry->m_currentDatabase->isClipboard())
     {
         autoGroup->untrigger();
     }
@@ -3230,18 +3230,18 @@ void MainWindow::slotDatabaseClearClipboard()
     auto clipDb = m_registry->databases().at(0);
     clipDb->database()->clear();
     clipDb->clearLastGames();
-    if (m_currentDatabase->isClipboard())
+    if (m_registry->m_currentDatabase->isClipboard())
     {
         m_gameList->startUpdate();
     }
     clipDb->filter()->resize(0, false);
-    if (m_currentDatabase->isClipboard())
+    if (m_registry->m_currentDatabase->isClipboard())
     {
         m_gameList->endUpdate();
     }
     clipDb->newGame();
 
-    if (m_currentDatabase->isClipboard())
+    if (m_registry->m_currentDatabase->isClipboard())
     {
         emit databaseChanged(databaseInfo());
         emit databaseModified();
@@ -3262,7 +3262,7 @@ void MainWindow::slotDatabaseChanged()
 {
     m_registry->m_undoGroup->setActiveStack(databaseInfo()->undoStack());
     database()->index()->calculateCache();
-    setWindowTitle(tr("%1 - ChessX").arg(m_currentDatabase->dbName()));
+    setWindowTitle(tr("%1 - ChessX").arg(m_registry->m_currentDatabase->dbName()));
     m_gameList->setFilter(databaseInfo()->filter());
     updateLastGameList();
     slotFilterChanged();
@@ -3602,7 +3602,7 @@ BoardView* MainWindow::CreateBoardView()
         BoardView* boardView = boardViewEx->boardView();
         boardView->configure();
         boardView->setBoard(BoardX::standardStartBoard);
-        boardView->setDbIndex(m_currentDatabase);
+        boardView->setDbIndex(m_registry->m_currentDatabase);
 
         connect(this, SIGNAL(reconfigure()), boardView, SLOT(configure()));
         connect(boardView, SIGNAL(moveMade(Square, Square, int)), SLOT(slotBoardMove(Square, Square, int)));
@@ -3623,7 +3623,7 @@ BoardView* MainWindow::CreateBoardView()
             connect(m_ficsConsole, SIGNAL(SignalStartTime(bool)), boardViewEx, SLOT(startTime(bool)));
         }
 
-        m_tabWidget->addTab(boardViewEx, m_currentDatabase->dbName());
+        m_tabWidget->addTab(boardViewEx, m_registry->m_currentDatabase->dbName());
         m_tabWidget->setCurrentWidget(boardViewEx);
         UpdateBoardInformation();
 
@@ -3695,7 +3695,7 @@ void MainWindow::slotActivateBoardView(int n)
         boardViewEx->slotReconfigure();
 
         BoardView* boardView = boardViewEx->boardView();
-        m_currentDatabase = qobject_cast<DatabaseInfo*>(boardView->dbIndex());
+        m_registry->m_currentDatabase = qobject_cast<DatabaseInfo*>(boardView->dbIndex());
 
         Q_ASSERT(!databaseInfo()->IsBook());
 
@@ -3795,7 +3795,7 @@ void MainWindow::UpdateBoardInformation()
 {
     if (!databaseInfo()->IsBook())
     {
-        QString name = "<div align='center'><p>" + m_currentDatabase->dbName() + "</p>";
+        QString name = "<div align='center'><p>" + m_registry->m_currentDatabase->dbName() + "</p>";
         QString nameWhite = game().tag(TagNameWhite);
         QString nameBlack = game().tag(TagNameBlack);
         if(!(nameWhite.isEmpty() && nameBlack.isEmpty()))
