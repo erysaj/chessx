@@ -17,7 +17,7 @@
 #define new DEBUG_NEW
 #endif // _MSC_VER
 
-HistoryList::HistoryList(int historySize) : m_unique(true)
+HistoryList::HistoryList(int historySize)
 {
     m_size = historySize;
 }
@@ -45,10 +45,7 @@ void HistoryList::append(const QString& item)
 {
     if(size())
     {
-        if(m_unique)
-        {
-            remove(item);
-        }
+        remove(item);
         if(count() == size())
         {
             m_data.pop_back();
@@ -127,14 +124,3 @@ void HistoryList::setItems(const QStringList& list)
         m_data.append(list[i]);
     }
 }
-
-bool HistoryList::isUnique() const
-{
-    return m_unique;
-}
-
-void HistoryList::setUnique(bool value)
-{
-    m_unique = value;
-}
-

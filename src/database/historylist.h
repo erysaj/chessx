@@ -22,7 +22,6 @@ class HistoryList
 private:
     QStringList m_data;
     int m_size;
-    bool m_unique;
 public:
     HistoryList(int historySize = 10);
     ~HistoryList();
@@ -54,12 +53,6 @@ public:
     QStringList items() const;
     /** Sets all items. */
     void setItems(const QStringList& list);
-    /** @return if older repeated value is automatically removed */
-    bool isUnique() const;
-    /** Sets whether older repeated value is automatically removed. Does not
-        affect current list content. */
-    void setUnique(bool value);
-private:
 };
 
 #endif
