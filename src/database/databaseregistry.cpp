@@ -12,17 +12,20 @@ DatabaseListEntry::DatabaseListEntry(const QString& path)
     , m_stars(0)
     , m_utf8(false)
     , m_lastGameIndex(0)
+    , m_info(nullptr)
 {
 }
 
 DatabaseRegistry::DatabaseRegistry()
     : m_undoGroup(new QUndoGroup(this))
 {
-    auto clipDb = new DatabaseInfo(m_undoGroup, new ClipboardDatabase);
-    m_databases.append(clipDb);
-
-    onDatabaseOpen(clipDb->database()->name(), false);
-
+    auto clipDb = new ClipboardDatabase;
+    auto clipInfo = new DatabaseInfo(m_undoGroup, clipDb);
+    auto clipItem = new DatabaseListEntry(clipDb->name());
+    clipItem->m_state = DatabaseListEntry::EDBL_OPEN;
+    clipItem->m_info = clipInfo;
+    insert(clipItem);
+    m_databases.append(clipInfo);
 }
 
 DatabaseRegistry::~DatabaseRegistry()
@@ -149,25 +152,6 @@ void DatabaseRegistry::insert(DatabaseListEntry* item)
     emit itemsInsertEnded(dst, dst);
 }
 
-void DatabaseRegistry::onDatabaseOpen(const QString& identifier, bool utf8)
-{
-    auto index = m_identifiers.indexOf(identifier);
-    if (index < 0)
-    {
-        // insert new entry
-        auto item = new DatabaseListEntry(identifier);
-        item->m_utf8 = utf8;
-        item->m_state = DatabaseListEntry::EDBL_OPEN;
-        insert(item);
-    }
-    else
-    {
-        // update existing entry
-        setState(identifier, DatabaseListEntry::EDBL_OPEN);
-        setUtf8(identifier, utf8);
-    }
-}
-
 void DatabaseRegistry::makeFavorite(const QString& identifier)
 {
     auto index = m_identifiers.indexOf(identifier);
@@ -261,9 +245,23 @@ void DatabaseRegistry::slotDataBaseLoaded(DatabaseInfo* db)
 {
     if (db->IsLoaded())
     {
-        QString fname = db->displayName();
-        onDatabaseOpen(fname, db->IsUtf8());
-        m_recentFiles.append(fname);
+        QString path = db->displayName();
+        auto item = m_items[path];
+        if (!item)
+        {
+            item = new DatabaseListEntry(path);
+            item->m_utf8 = db->IsUtf8();
+            item->m_state = DatabaseListEntry::EDBL_OPEN;
+            item->m_info = db;
+            insert(item);
+        }
+        else
+        {
+            item->m_info = db;
+            setState(path, DatabaseListEntry::EDBL_OPEN);
+            setUtf8(path, db->IsUtf8());
+        }
+        m_recentFiles.append(path);
         emit dbOpenSuccess(db);
     }
     else

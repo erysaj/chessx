@@ -74,6 +74,7 @@ public:
     int     m_stars;
     bool    m_utf8;
     int     m_lastGameIndex;
+    DatabaseInfo* m_info;
 };
 
 class DatabaseRegistry: public QObject
@@ -106,7 +107,6 @@ public:
     void saveFavorites(IConfig& cfg) const;
     void loadFavorites(const IConfig& cfg);
 
-    void onDatabaseOpen(const QString& identifier, bool utf8);
     void makeFavorite(const QString& identifier);
 
     void openFile(const QString& path, bool utf8);
