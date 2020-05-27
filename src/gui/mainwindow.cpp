@@ -310,7 +310,8 @@ MainWindow::MainWindow() : QMainWindow(),
     m_databaseList->setFavoriteDatabase(ficsPath());
 
     /* Recent files */
-    m_recentFiles.restore();
+    SettingsConfig cfg(*AppSettings);
+    m_recentFiles.load(cfg);
     m_recentFiles.removeMissingFiles();
 
     /* Opening Tree */
@@ -595,12 +596,9 @@ void MainWindow::closeEvent(QCloseEvent* e)
 {
     if(confirmQuit())
     {
-        m_recentFiles.save();
-        // save favorites
-        {
-            SettingsConfig cfg(*AppSettings);
-            m_registry->saveFavorites(cfg);
-        }
+        SettingsConfig cfg(*AppSettings);
+        m_recentFiles.save(cfg);
+        m_registry->saveFavorites(cfg);
 
         m_gameList->saveConfig();
         m_databaseList->saveConfig();

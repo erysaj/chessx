@@ -349,7 +349,8 @@ void MainWindow::slotReconfigure()
         SetWindowPos((HWND)winId(), HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
     }
 #endif
-    m_recentFiles.restore();
+    SettingsConfig cfg(*AppSettings);
+    m_recentFiles.load(cfg);
     emit reconfigure(); 	// Re-emit for children
     UpdateGameText();
 }

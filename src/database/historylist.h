@@ -12,6 +12,8 @@
 
 #include <QStringList>
 
+#include "config.h"
+
 /** @ingroup Core
   The HistoryList class provides a list of @p N recent string items that
   can be stored/restored.
@@ -26,9 +28,9 @@ public:
     HistoryList(int historySize = 10);
     ~HistoryList();
     /** Restore the list from application settings. */
-    void restore();
+    void load(const IConfig& cfg);
     /** Save the list with application settings. */
-    void save() const;
+    void save(IConfig& cfg) const;
     /** @return current number of items. */
     int count() const;
     /** @return current size. */

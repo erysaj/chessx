@@ -25,20 +25,15 @@ HistoryList::HistoryList(int historySize)
 HistoryList::~HistoryList()
 {}
 
-void HistoryList::restore()
+void HistoryList::load(const IConfig &cfg)
 {
-    AppSettings->beginGroup("/History/");
-    setSize(AppSettings->getValue("MaxEntries").toInt());
-    QStringList list = AppSettings->value("RecentFiles").toStringList();
-    AppSettings->endGroup();
-    setItems(list);
+    setSize(cfg.value("/History/MaxEntries", 4).toInt());
+    setItems(cfg.value("/History/RecentFiles").toStringList());
 }
 
-void HistoryList::save() const
+void HistoryList::save(IConfig &cfg) const
 {
-    AppSettings->beginGroup("/History/");
-    AppSettings->setValue("RecentFiles", items());
-    AppSettings->endGroup();
+    cfg.setValue("/History/RecentFiles", items());
 }
 
 void HistoryList::append(const QString& item)
