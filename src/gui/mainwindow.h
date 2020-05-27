@@ -95,8 +95,6 @@ protected:
     const Database* database() const;
     /** @return active database structure */
     DatabaseInfo* databaseInfo();
-    /** @return database name of database @p index (or active, if no parameter). */
-    QString databaseName(int index = -1) const;
     /** @return active database structure */
     const DatabaseInfo* databaseInfo() const;
     /** @return database structure */

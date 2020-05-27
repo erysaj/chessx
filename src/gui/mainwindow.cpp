@@ -749,20 +749,6 @@ const Database* MainWindow::database() const
     return databaseInfo()->database();
 }
 
-QString MainWindow::databaseName(int index) const
-{
-    DatabaseInfo* pDbInfo;
-    if(index < 0)
-    {
-        pDbInfo = m_currentDatabase;
-    }
-    else
-    {
-        pDbInfo = m_registry->databases().at(index);
-    }
-    return pDbInfo->dbName();
-}
-
 Database* MainWindow::getDatabaseByPath(QString path)
 {
     if(DatabaseInfo* dbInfo = getDatabaseInfoByPath(path))

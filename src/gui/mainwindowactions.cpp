@@ -2783,7 +2783,8 @@ void MainWindow::slotFilterChanged(bool selectGame)
     quint64 filteredCount = databaseInfo()->filter() ? databaseInfo()->filter()->count() : 0;
     quint64 databaseCount = database()->count();
     QString f = filteredCount == databaseCount ? tr("all") : QString::number(filteredCount);
-    m_statusFilter->setText(QString(" %1: %2/%3 ").arg(databaseName(), f).arg(database()->count()));
+    m_statusFilter->setText(QString(" %1: %2/%3 ").arg(m_currentDatabase->dbName())
+                            .arg(f).arg(database()->count()));
     m_statusFilter->repaint(); // Workaround Bug in Qt 5.11 and 5.12
 }
 
@@ -3261,7 +3262,7 @@ void MainWindow::slotDatabaseChanged()
 {
     m_registry->m_undoGroup->setActiveStack(databaseInfo()->undoStack());
     database()->index()->calculateCache();
-    setWindowTitle(tr("%1 - ChessX").arg(databaseName()));
+    setWindowTitle(tr("%1 - ChessX").arg(m_currentDatabase->dbName()));
     m_gameList->setFilter(databaseInfo()->filter());
     updateLastGameList();
     slotFilterChanged();
@@ -3622,7 +3623,7 @@ BoardView* MainWindow::CreateBoardView()
             connect(m_ficsConsole, SIGNAL(SignalStartTime(bool)), boardViewEx, SLOT(startTime(bool)));
         }
 
-        m_tabWidget->addTab(boardViewEx, databaseName());
+        m_tabWidget->addTab(boardViewEx, m_currentDatabase->dbName());
         m_tabWidget->setCurrentWidget(boardViewEx);
         UpdateBoardInformation();
 
@@ -3794,7 +3795,7 @@ void MainWindow::UpdateBoardInformation()
 {
     if (!databaseInfo()->IsBook())
     {
-        QString name = "<div align='center'><p>" + databaseName() + "</p>";
+        QString name = "<div align='center'><p>" + m_currentDatabase->dbName() + "</p>";
         QString nameWhite = game().tag(TagNameWhite);
         QString nameBlack = game().tag(TagNameBlack);
         if(!(nameWhite.isEmpty() && nameBlack.isEmpty()))
