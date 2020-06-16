@@ -1,6 +1,7 @@
 #include "gamenotationwidget.h"
 
 #include <QHBoxLayout>
+#include <QGraphicsView>
 
 #include "chessbrowser.h"
 #include "settings.h"
@@ -13,10 +14,12 @@ GameNotationWidget::GameNotationWidget(QWidget* parent)
     , m_output(nullptr)
 {
     m_browser = new ChessBrowser(nullptr);
+    m_graphicsView = new QGraphicsView();
 
     // setup layout
     auto layout = new QHBoxLayout();
     layout->addWidget(m_browser);
+    layout->addWidget(m_graphicsView);
     layout->setMargin(0);
     setLayout(layout);
 

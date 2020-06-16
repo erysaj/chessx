@@ -9,6 +9,7 @@
 #include "gamex.h"
 
 class ChessBrowser;
+class QGraphicsView;
 class Output;
 
 
@@ -46,6 +47,7 @@ private:
     void configureFont();
 
     ChessBrowser *m_browser;
+    QGraphicsView *m_graphicsView;
     Output* m_output;
 };
 
