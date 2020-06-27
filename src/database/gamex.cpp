@@ -1829,3 +1829,169 @@ int GameX::isBetterOrEqual(const GameX& game) const
             (m_annotations.count() >= game.m_annotations.count()) &&
             (m_variationStartAnnotations.count() >= game.m_variationStartAnnotations.count()));
 }
+
+MoveIterator::MoveIterator()
+    : m_game(nullptr)
+    , m_board()
+    , m_srcId(NO_MOVE)
+    , m_dstId(NO_MOVE)
+{
+}
+
+MoveIterator::MoveIterator(const GameX &game)
+    : m_game(&game)
+    , m_board(game.startingBoard())
+    , m_srcId(ROOT_NODE)
+    , m_dstId(game.cursor().nextMove(ROOT_NODE))
+{
+    if (m_dstId == NO_MOVE)
+    {
+        clear();
+    }
+}
+
+void MoveIterator::clear()
+{
+    m_game = nullptr;
+    m_board.clear();
+    m_srcId = NO_MOVE;
+    m_dstId = NO_MOVE;
+}
+
+BoardX MoveIterator::dstBoard() const
+{
+    BoardX board(m_board);
+    if (*this)
+    {
+        board.doMove(move());
+    }
+    return board;
+}
+
+bool MoveIterator::isFirstLine() const
+{
+    return m_game && m_game->cursor().nextMove(m_srcId) == m_dstId;
+}
+
+bool MoveIterator::hasVariations() const
+{
+    return m_game && m_game->cursor().variationCount(m_srcId) > 0;
+}
+
+MoveIterator MoveIterator::nextVariation() const
+{
+    MoveIterator varIt;
+    if (hasVariations())
+    {
+        const auto& vars = m_game->cursor().variations(m_srcId);
+        int i = vars.indexOf(m_dstId);
+        auto dstId = i + 1;
+        if (0 <= dstId && dstId < vars.count())
+        {
+            varIt.m_game = m_game;
+            varIt.m_board = m_board;
+            varIt.m_srcId = m_srcId;
+            varIt.m_dstId = vars[i + 1];
+        }
+    }
+    return varIt;
+}
+
+MoveIterator& MoveIterator::operator++()
+{
+    if (m_dstId != NO_MOVE)
+    {
+        m_srcId = m_dstId;
+        m_board.doMove(m_game->cursor().move(m_dstId));
+        m_dstId = m_game->cursor().nextMove(m_srcId);
+        if (m_dstId == NO_MOVE)
+        {
+            clear();
+        }
+    }
+    return *this;
+}
+
+MoveIterator MoveIterator::operator++(int)
+{
+    auto ans = *this;
+    ++*this;
+    return ans;
+}
+
+MoveIterator MoveIterator::next() const
+{
+    auto ans = *this;
+    ++ans;
+    return ans;
+}
+
+bool MoveIterator::hasNext() const
+{
+    return m_dstId != NO_MOVE && m_game->cursor().nextMove(m_dstId) != NO_MOVE;
+}
+
+AnnotatedVariation::AnnotatedVariation(const GameX &game)
+    : m_game(game)
+    , m_start(game)
+{}
+
+AnnotatedVariation::AnnotatedVariation(const GameX &game, const MoveIterator &start)
+    : m_game(game)
+    , m_start(start)
+{}
+
+void AnnotatedVariation::visit(IVisitor &visitor, VisitingOptions options) const
+{
+    BoardX diagramBoard;
+    MoveIterator lineBegin = m_start;
+
+    // visit pre-comment
+    if (lineBegin)
+    {
+        const auto moveId = lineBegin.dstMoveId();
+        const auto comment = m_game.textAnnotation(moveId, GameX::BeforeMove);
+        if (!comment.isEmpty())
+        {
+            visitor.visitComment(comment, moveId, GameX::BeforeMove);
+        }
+    }
+
+    // split move sequence into fragments
+    auto fragmentBegin = lineBegin;
+    for (auto curr = lineBegin; curr;)
+    {
+        const auto comment = m_game.textAnnotation(curr.dstMoveId());
+
+        auto hasAnnotation = !comment.isEmpty();
+        auto hasVariations = curr.isFirstLine() && curr.hasVariations();
+        auto hasDiagram = (options & Visit_Diagrams) && m_game.nags(curr.dstMoveId()).contains(NagDiagram);
+
+        auto next = curr.next();
+        auto isFragmentDone = hasAnnotation || hasVariations || hasDiagram || !next;
+
+        if (isFragmentDone)
+        {
+            visitor.visitMoves(fragmentBegin, next);
+
+            if (hasDiagram)
+            {
+                visitor.visitDiagram(curr.dstBoard());
+            }
+            if (hasAnnotation)
+            {
+                visitor.visitComment(comment, curr.dstMoveId(), GameX::AfterMove);
+            }
+            if (hasVariations)
+            {
+                for (auto varIt = curr.nextVariation(); varIt; varIt = varIt.nextVariation())
+                {
+                    AnnotatedVariation variation(m_game, varIt);
+                    visitor.visitVariation(variation);
+                }
+            }
+            fragmentBegin = next;
+        }
+        curr = next;
+    }
+}

@@ -441,5 +441,95 @@ private:
     MoveId m_saveMoveValue;
 };
 
+
+/**
+ * A "pointer" to the beginning of the line
+ */
+class MoveIterator
+{
+public:
+    /** Constructs a "null" iterator */
+    MoveIterator();
+
+    /** Attempts to construct an instance for iterating @game moves
+     *
+     * @returns
+     * - default-initialized instance if @p game has no moves
+     * - iterator pointing to the main line's first move otherwise
+     */
+    MoveIterator(const GameX &game);
+
+    /** Get the current move */
+    Move move() const { return m_game->cursor().move(m_dstId); }
+    /** Get the current move's number (starting from 1) */
+    int moveNumber() const { return m_board.moveNumber(); }
+    /** Get the current position */
+    const BoardX& srcBoard() const { return m_board; }
+    /** Get the position after applying the current move */
+    BoardX dstBoard() const;
+    /** Get move ID corresponding to the current position */
+    MoveId srcMoveId() const { return m_srcId; }
+    /** Get move ID corresponding to the position after the current move */
+    MoveId dstMoveId() const { return m_dstId; }
+
+    /** Check if iterator is "non-null" */
+    explicit operator bool() const { return m_game != nullptr; }
+
+    /** Check if the current move is the first possible one */
+    bool isFirstLine() const;
+    /** Check if game has alternate moves */
+    bool hasVariations() const;
+    /** Retrieve the pointer to the next variation */
+    MoveIterator nextVariation() const;
+
+    bool operator==(const MoveIterator &rhs) const { return m_game == rhs.m_game && m_srcId == rhs.m_srcId; }
+    bool operator!=(const MoveIterator &rhs) const { return !(*this == rhs); }
+
+    MoveIterator& operator++();
+    MoveIterator operator++(int);
+
+    MoveIterator next() const;
+    bool hasNext() const;
+
+private:
+    void clear();
+
+    const GameX *m_game;
+    BoardX m_board;
+    MoveId m_srcId;
+    MoveId m_dstId;
+};
+
+
+class AnnotatedVariation
+{
+public:
+    /** creates an represenation of @p game main line*/
+    AnnotatedVariation(const GameX &game);
+
+    struct IVisitor
+    {
+        virtual ~IVisitor() = default;
+
+        virtual void visitComment(const QString &text, MoveId moveId, GameX::Position position) = 0;
+        virtual void visitMoves(const MoveIterator &first, const MoveIterator &last) = 0;
+        virtual void visitDiagram(const BoardX &board) = 0;
+        virtual void visitVariation(const AnnotatedVariation &variation) = 0;
+    };
+
+    enum VisitingOptions: unsigned
+    {
+        Visit_Diagrams = 0x01,
+    };
+
+    void visit(IVisitor &visitor, VisitingOptions options) const;
+
+private:
+    AnnotatedVariation(const GameX &game, const MoveIterator &start);
+
+    const GameX &m_game;
+    MoveIterator m_start;
+};
+
 #endif	// GAME_H_INCLUDED
 
