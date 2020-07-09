@@ -364,6 +364,8 @@ add_library(gui STATIC
   gui/gamewindow.cpp
   gui/gamewindow.h
   gui/gamewindow.ui
+  gui/graphicsflowlayout.cpp
+  gui/graphicsflowlayout.h
   gui/helpbrowser.cpp
   gui/helpbrowser.h
   gui/helpbrowsershell.cpp

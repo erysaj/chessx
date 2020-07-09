@@ -253,6 +253,7 @@ HEADERS += src/database/board.h \
   src/gui/gamenotationwidget.h \
   src/gui/gametoolbar.h \
   src/gui/gamewindow.h \
+  src/gui/graphicsflowlayout.h \
   src/gui/helpbrowser.h \
   src/gui/helpbrowsershell.h \
   src/gui/historylabel.h \
@@ -410,6 +411,7 @@ SOURCES += \
   src/gui/gamenotationwidget.cpp \
   src/gui/gametoolbar.cpp \
   src/gui/gamewindow.cpp \
+  src/gui/graphicsflowlayout.cpp \
   src/gui/helpbrowser.cpp \
   src/gui/helpbrowsershell.cpp \
   src/gui/historylabel.cpp \
