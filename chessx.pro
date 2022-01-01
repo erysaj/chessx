@@ -7,7 +7,7 @@ TEMPLATE = app
 
 greaterThan(QT_MAJOR_VERSION, 4) {
   QT += printsupport
-  QT += core gui widgets
+  QT += core gui widgets quickwidgets
   QT += xml
   QT -= multimediawidgets
   # Comment out sound for Ubuntu with Qt5 if multimedia is not available (default in Ubuntu)
@@ -315,6 +315,7 @@ HEADERS += src/database/board.h \
   src/gui/ooo/styleinformation.h \
   src/gui/ooo/styleparser.h \
   src/gui/openingtreewidget.h \
+  src/gui/pgnwidget.h \
   src/gui/plaintextedit.h \
   src/gui/playerlistwidget.h \
   src/gui/qled.h \
@@ -482,6 +483,7 @@ SOURCES += \
   src/gui/ooo/styleinformation.cpp \
   src/gui/ooo/styleparser.cpp \
   src/gui/openingtreewidget.cpp \
+  src/gui/pgnwidget.cpp \
   src/gui/plaintextedit.cpp \
   src/gui/playerlistwidget.cpp \
   src/gui/qled.cpp \

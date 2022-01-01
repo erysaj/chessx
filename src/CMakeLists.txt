@@ -416,6 +416,8 @@ add_library(gui STATIC
   gui/openingtreewidget.cpp
   gui/openingtreewidget.h
   gui/openingtreewidget.ui
+  gui/pgnwidget.cpp
+  gui/pgnwidget.h
   gui/plaintextedit.cpp
   gui/plaintextedit.h
   gui/playerlistwidget.cpp
