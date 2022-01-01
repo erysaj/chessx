@@ -141,7 +141,7 @@ std::unique_ptr<ScidStorage> ScidStorage::open(QString path, Progress &progress)
     auto index = std::make_unique<Index>();
     auto names = std::make_unique<NameBase>();
     
-    auto dbname = path.chopped(4); // remove .si4 extension
+    auto dbname = path; path.chop(4); // remove .si4 extension
     auto dbnameUtf8 = dbname.toUtf8().data();
     auto codec = std::make_unique<CodecSCID4>();
     auto err = codec->dyn_open(FMODE_ReadOnly, dbnameUtf8, progress, index.get(), names.get());
