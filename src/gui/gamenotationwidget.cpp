@@ -6,17 +6,21 @@
 #include "settings.h"
 #include "output.h"
 #include "boardview.h"
+#include "pgnwidget.h"
 
 GameNotationWidget::GameNotationWidget(QWidget* parent)
     : QWidget(parent)
     , m_browser(nullptr)
+    , m_notation(nullptr)
     , m_output(nullptr)
 {
     m_browser = new ChessBrowser(nullptr);
+    m_notation = new PgnWidget(nullptr);
 
     // setup layout
     auto layout = new QHBoxLayout();
     layout->addWidget(m_browser);
+    layout->addWidget(m_notation);
     layout->setMargin(0);
     setLayout(layout);
 
@@ -26,6 +30,8 @@ GameNotationWidget::GameNotationWidget(QWidget* parent)
     connect(m_browser, &ChessBrowser::actionRequested, this, &GameNotationWidget::actionRequested);
     connect(m_browser, &ChessBrowser::queryActiveGame, this, &GameNotationWidget::queryActiveGame);
     connect(m_browser, &ChessBrowser::signalMergeGame, this, &GameNotationWidget::signalMergeGame);
+
+    connect(m_notation, &PgnWidget::anchorClicked, this, &GameNotationWidget::anchorClicked);
 }
 
 GameNotationWidget::~GameNotationWidget()
@@ -58,6 +64,8 @@ void GameNotationWidget::reload(const GameX& game, bool trainingMode)
     auto text = m_output->output(&game, trainingMode);
     m_browser->setText(text);
     m_browser->showMove(game.currentMove());
+
+    m_notation->reload(game, trainingMode);
 }
 
 QMap<Nag, QAction*> GameNotationWidget::nagActions() const
@@ -94,6 +102,7 @@ void GameNotationWidget::slotReconfigure()
 void GameNotationWidget::showMove(int id)
 {
     m_browser->showMove(id);
+    m_notation->showMove(id);
 }
 
 void GameNotationWidget::configureFont()

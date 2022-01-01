@@ -9,6 +9,7 @@
 #include "gamex.h"
 
 class ChessBrowser;
+class PgnWidget;
 class Output;
 
 
@@ -38,7 +39,7 @@ public slots:
     void showMove(int id);
 
 signals:
-    void anchorClicked(const QUrl& url);
+    void anchorClicked(const QUrl &url);
     void actionRequested(const EditAction& action);
     void queryActiveGame(const GameX** game);
     void signalMergeGame(GameId gameIndex, QString source);
@@ -47,7 +48,8 @@ private:
     void configureFont();
 
     ChessBrowser *m_browser;
-    Output* m_output;
+    PgnWidget *m_notation;
+    Output *m_output;
 };
 
 #endif
