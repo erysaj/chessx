@@ -6,17 +6,22 @@ jobs:
   package:
     name: make ${{ matrix.target }} / ${{ matrix.os }} 
     strategy:
+      fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         qt: ['5.15.2']
-        target:
-          - package
-          - source_package
-        exclude:
+        include:
+          - os: ubuntu-latest
+            target: package_source
+            glob: "*.tar.gz"
+          - os: macos-latest
+            target: package
+            glob: "*.dmg"
           - os: windows-latest
-            target: source_package
+            target: package
+            glob: "*.msi"
     runs-on: ${{ matrix.os }}
-  
+
     steps:
     - name: Install Qt ${{ matrix.qt }}
       uses: jurplel/install-qt-action@v3
@@ -40,16 +45,16 @@ jobs:
         vcpkgJsonGlob: 'vcpkg.json'
         # runVcpkgInstall: true
 
-    - name: configure
-      run: cmake --preset ci
-
-    - name: make
-      if: ${{ matrix.target == 'package' }}
-      run: cmake --build --preset ci-release
-
-    - name: make test
-      if: ${{ matrix.target == 'package' }}
-      run: ctest --build --preset ci-release
+    - name: Build + Test (Release)
+      uses: lukka/run-cmake@v10
+      with:
+        configurePreset: 'ci-package'
+        buildPreset: 'ci-package'
+        testPreset: 'ci-package'
 
     - name: make ${{ matrix.target }}
-      run: cmake --build --preset ci-release --target ${{ matrix.target }}
+      run: cmake --build --preset ci-package --target ${{ matrix.target }}
+
+    - uses: actions/upload-artifact@v3
+      with:
+        path: ${{ runner.workspace }}/chessx/builds/ci-package/${{ matrix.glob }}

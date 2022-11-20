@@ -28,7 +28,11 @@ set(CPACK_SOURCE_IGNORE_FILES
 )
 
 set(CPACK_PACKAGE_FILE_NAME        "${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}")
-set(CPACK_GENERATOR "DragNDrop")
+if (APPLE)
+    set(CPACK_GENERATOR "DragNDrop")
+elseif(WIN32)
+    set(CPACK_GENERATOR "WIX")
+endif()
 
 # Automatically escape CPACK_* variables
 set(CPACK_VERBATIM_VARIABLES YES)
