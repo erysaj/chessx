@@ -80,13 +80,6 @@ jobs:
         buildPreset: 'ci-debug'
         testPreset: 'ci-debug'
 
-    # - name: Create source package
-    #   if: ${{ runner.os == 'Linux' }}
-    #   run: cmake --build --preset ci-release --target package_source
-    # - name: Create macOS installer
-    #   if: ${{ runner.os == 'macOS' }}
-    #   run: cmake --build --preset ci-release --target package
-
     #env:
     #  VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }} # [OPTIONAL] Define the vcpkg's triplet 
     # you want to enforce, otherwise the default one for the hosting system will be 

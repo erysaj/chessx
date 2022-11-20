@@ -1,0 +1,55 @@
+name: package
+
+on: workflow_dispatch
+
+jobs:
+  package:
+    name: make ${{ matrix.target }} / ${{ matrix.os }} 
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+        qt: ['5.15.2']
+        target:
+          - package
+          - source_package
+        exclude:
+          - os: windows-latest
+            target: source_package
+    runs-on: ${{ matrix.os }}
+  
+    steps:
+    - name: Install Qt ${{ matrix.qt }}
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ matrix.qt }}
+        dir: ${{ runner.workspace }}/Qt-${{ matrix.qt }}
+        cache: true
+        cache-key-prefix: Qt-${{ matrix.os }}-${{ matrix.qt }}
+
+    - name: Checkout sources
+      uses: actions/checkout@v3
+      with:
+        submodules: true
+
+    # Install latest CMake
+    - uses: lukka/get-cmake@latest
+
+    - name: Restore artifacts, or setup vcpkg (do not install any package)
+      uses: lukka/run-vcpkg@v10
+      with:
+        vcpkgJsonGlob: 'vcpkg.json'
+        # runVcpkgInstall: true
+
+    - name: configure
+      run: cmake --preset ci
+
+    - name: make
+      if: ${{ matrix.target == 'package' }}
+      run: cmake --build --preset ci-release
+
+    - name: make test
+      if: ${{ matrix.target == 'package' }}
+      run: ctest --build --preset ci-release
+
+    - name: make ${{ matrix.target }}
+      run: cmake --build --preset ci-release --target ${{ matrix.target }}
