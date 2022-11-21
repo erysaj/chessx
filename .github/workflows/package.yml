@@ -19,7 +19,7 @@ jobs:
             glob: "*.dmg"
           - os: windows-latest
             target: package
-            glob: "*.msi"
+            glob: "setup-*.*"
     runs-on: ${{ matrix.os }}
 
     steps:

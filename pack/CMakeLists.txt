@@ -32,7 +32,7 @@ if (APPLE)
     set(CPACK_GENERATOR "DragNDrop")
 elseif(WIN32)
     set(CPACK_PACKAGE_FILE_NAME        "setup-${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}")
-    set(CPACK_GENERATOR "NSIS64")
+    set(CPACK_GENERATOR "NSIS64" "WIX")
 endif()
 
 # Automatically escape CPACK_* variables
